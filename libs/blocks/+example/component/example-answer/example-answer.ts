@@ -1,39 +1,29 @@
-import { Component, ChangeDetectionStrategy, ElementRef, ViewEncapsulation, ViewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ElementRef, ViewChild, OnInit } from '@angular/core';
 import { ExampleComponent } from '../example/example';
 import { getParentComponent } from '@skyeng/libs/blocks/base/helpers';
 
 @Component({
   selector: 'sky-example-answer',
   template: `
-    <slot (slotchange)="onSlotChange()"
-          #slot>
-    </slot>
+    <ng-content></ng-content>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.ShadowDom,
 })
-export class ExampleAnswerComponent {
-  @ViewChild('slot') slotRef: ElementRef<HTMLSlotElement>;
-
-  private initDone = false;
-
+export class ExampleAnswerComponent implements OnInit {
   constructor(
     private elementRef: ElementRef<HTMLElement>,
   ) {
   }
 
-  public onSlotChange() {
-    if (this.initDone) {
-      return;
-    }
+  public ngOnInit() {
+    // no content on init
+    window.setTimeout(() => {
+      const answer = parseInt(this.elementRef.nativeElement.textContent, 10);
+      const exampleComponent = getParentComponent<ExampleComponent>(this.elementRef.nativeElement, 'sky-example');
 
-    const textElement = this.slotRef.nativeElement.assignedNodes()[0];
-    const answer = parseInt(textElement.textContent, 10);
-    const exampleComponent = getParentComponent<ExampleComponent>(this.elementRef.nativeElement, 'sky-example');
+      exampleComponent.addCorrectAnswer(answer);
 
-    exampleComponent.addCorrectAnswer(answer);
-
-    this.elementRef.nativeElement.textContent = '';
-    this.initDone = true;
+      this.elementRef.nativeElement.textContent = '';
+    });
   }
 }

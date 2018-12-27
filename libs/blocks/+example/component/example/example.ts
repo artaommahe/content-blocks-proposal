@@ -1,11 +1,11 @@
-import { Component, ChangeDetectionStrategy, OnInit, ViewEncapsulation, Input } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Component, ChangeDetectionStrategy, OnInit, Input } from '@angular/core';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { map, combineLatest, debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'sky-example',
   template: `
-    <slot></slot>
+    <ng-content></ng-content>
 
     <sky-example-view [isCorrect]="isCorrect$ | async"
                       [value]="value$ | async"
@@ -13,11 +13,10 @@ import { map } from 'rxjs/operators';
     </sky-example-view>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.ShadowDom,
 })
 export class ExampleComponent implements OnInit {
   // ---> model part
-  private correctAnswers: number[] = [];
+  private correctAnswers = new BehaviorSubject<number[]>([]);
   private value = new BehaviorSubject<number>(0);
 
   public isCorrect$: Observable<boolean>;
@@ -30,17 +29,23 @@ export class ExampleComponent implements OnInit {
   }
 
   public ngOnInit() {
+    const correctAnswers$ = this.correctAnswers.pipe(
+      debounceTime(0),
+    );
+
     this.isCorrect$ = this.value$.pipe(
-      map(value => this.correctAnswers.includes(value)),
+      combineLatest(correctAnswers$),
+      map(([ value, correctAnswers ]) => correctAnswers.includes(value)),
     );
   }
 
+  // https://github.com/angular/angular/issues/22114
   @Input()
   public addCorrectAnswer = (correctAnswer: number): void => {
-    this.correctAnswers = [
-      ...this.correctAnswers,
+    this.correctAnswers.next([
+      ...this.correctAnswers.getValue(),
       correctAnswer,
-    ];
+    ]);
   }
 
   public setValue(value: number): void {
