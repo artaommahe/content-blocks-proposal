@@ -1,0 +1,17 @@
+<div class="root">
+  <div class="value"
+       [class.-correct]="isCorrect">
+    {{ value }}
+  </div>
+
+  <button class="action"
+          [disabled]="isCorrect"
+          (click)="inc()">
+    inc
+  </button>
+  <button class="action"
+          [disabled]="isCorrect"
+          (click)="dec()">
+    dec
+  </button>
+</div>
