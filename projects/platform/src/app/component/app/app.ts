@@ -34,7 +34,7 @@ export class AppComponent implements OnInit {
     if (!eventData) {
       return;
     }
-console.log('> eventData', eventData);
+
     blocksDispatchGlobalEvent(SYNC_EVENTS.data, eventData);
   }
 }

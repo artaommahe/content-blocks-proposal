@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, OnInit, Input, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { map, combineLatest, debounceTime, takeUntil } from 'rxjs/operators';
+import { map, combineLatest, debounceTime, takeUntil, filter } from 'rxjs/operators';
 import { BlockApi } from '@skyeng/libs/blocks/base/service/block-api';
 import { BlockService } from '@skyeng/libs/blocks/base/service/block';
 import { TExampleData } from '../../interface';
@@ -37,6 +37,7 @@ export class ExampleComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit() {
+    // ---> MODEL PART
     const correctAnswers$ = this.correctAnswers.pipe(
       debounceTime(0),
     );
@@ -45,12 +46,16 @@ export class ExampleComponent implements OnInit, OnDestroy {
       combineLatest(correctAnswers$),
       map(([ value, correctAnswers ]) => correctAnswers.includes(value)),
     );
+    // <---
 
     this.blockApi = this.blockService.createApi<TExampleData>({
       id: this.id,
       sync: {
         enabled: true,
       },
+      scoring: {
+        enabled: true,
+      }
     });
 
     this.blockApi.syncOnData()
@@ -58,6 +63,15 @@ export class ExampleComponent implements OnInit, OnDestroy {
         takeUntil(this.destroyed),
       )
       .subscribe(value => this.setValue(value, false));
+
+    // ---> SCORING PART
+    this.isCorrect$
+      .pipe(
+        filter(isCorrect => isCorrect),
+        takeUntil(this.destroyed),
+      )
+      .subscribe(() => this.blockApi.scoringSet(true, 1));
+    // <---
   }
 
   public ngOnDestroy() {
