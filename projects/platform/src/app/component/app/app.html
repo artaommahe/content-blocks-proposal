@@ -1,4 +1,29 @@
-<sky-example id="">
-  <sky-example-answer>5</sky-example-answer>
-  <sky-example-answer>-3</sky-example-answer>
-</sky-example>
+<div *ngIf="initDone$ | async"
+     class="blocks">
+  <sky-example id="example1">
+    <sky-example-answer>5</sky-example-answer>
+    <sky-example-answer>-3</sky-example-answer>
+  </sky-example>
+</div>
+
+<div class="controls">
+  <div class="events">
+    Events
+
+    - send (number)
+    <input type="text"
+            (input)="eventData = $event.target.value" />
+
+    <button (click)="sendEvent()">send</button>
+
+    <br>
+
+    - log
+    <div class="log">
+        <div *ngFor="let event of (events$ | async)"
+        class="event">
+      {{ event | json }}
+    </div>
+    </div>
+  </div>
+</div>

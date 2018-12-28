@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter } from '@angular/core';
+import { TExampleData } from '../../interface';
 
 @Component({
   selector: 'sky-example-view',
@@ -8,7 +9,7 @@ import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter } from 
 })
 export class ExampleViewComponent {
   @Input() isCorrect: boolean;
-  @Input() value: number;
+  @Input() value: TExampleData;
 
   @Output() valueChange = new EventEmitter<number>();
 

@@ -2173,6 +2173,13 @@ electron-to-chromium@^1.3.92:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.96.tgz#25770ec99b8b07706dedf3a5f43fa50cb54c4f9a"
   integrity sha512-ZUXBUyGLeoJxp4Nt6G/GjBRLnyz8IKQGexZ2ndWaoegThgMGFO1tdDYID5gBV32/1S83osjJHyfzvanE/8HY4Q==
 
+elements-zone-strategy@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/elements-zone-strategy/-/elements-zone-strategy-7.0.0.tgz#1f5b23ae9a4d4df24f4c520af2f6020ecd7fef3f"
+  integrity sha512-L9IJHuk1mlsRp2Xi9f5Dq9vluZPO5XDm/aveF28uRUL4sAyLw81gRwrIEVtucXx/eVTmgIvh4jf2god2IAjDrg==
+  dependencies:
+    tslib "^1.9.0"
+
 elliptic@^6.0.0:
   version "6.4.1"
   resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.4.1.tgz#c2d0b7776911b86722c632c3c06c60f2f819939a"

@@ -2,6 +2,7 @@ import { NgModule, Injector } from '@angular/core';
 import { BlocksExampleModule } from './+example/module';
 import { createCustomElement } from '@angular/elements';
 import { EXAMPLE_BLOCKS } from './+example/blocks';
+import { ElementZoneStrategyFactory } from 'elements-zone-strategy';
 
 const CUSTOM_ELEMENTS = [
   ...EXAMPLE_BLOCKS,
@@ -18,7 +19,8 @@ export class BlocksModule {
     private injector: Injector,
   ) {
     CUSTOM_ELEMENTS.forEach(({ component, selector }) => {
-      const element = createCustomElement(component, { injector: this.injector });
+      const strategyFactory = new ElementZoneStrategyFactory(component, this.injector);
+      const element = createCustomElement(component, { injector: this.injector, strategyFactory });
 
       customElements.define(selector, element);
     });

@@ -16,7 +16,7 @@ export class ExampleAnswerComponent implements OnInit {
   }
 
   public ngOnInit() {
-    // no content on init
+    // no ng-content content on init
     window.setTimeout(() => {
       const answer = parseInt(this.elementRef.nativeElement.textContent, 10);
       const exampleComponent = getParentComponent<ExampleComponent>(this.elementRef.nativeElement, 'sky-example');
