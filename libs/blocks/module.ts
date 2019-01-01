@@ -1,17 +1,17 @@
 import { NgModule, Injector } from '@angular/core';
-import { BlocksExampleModule } from './+example/module';
+import { BlocksInputModule } from './+input/module';
 import { createCustomElement } from '@angular/elements';
-import { EXAMPLE_BLOCKS } from './+example/blocks';
+import { INPUT_BLOCKS } from './+input/blocks';
 import { ElementZoneStrategyFactory } from 'elements-zone-strategy';
 
 const CUSTOM_ELEMENTS = [
-  ...EXAMPLE_BLOCKS,
+  ...INPUT_BLOCKS,
 ];
 
 @NgModule({
   imports: [
     // only for example, lazy loading instead of direct import in real app
-    BlocksExampleModule,
+    BlocksInputModule,
   ]
 })
 export class BlocksModule {

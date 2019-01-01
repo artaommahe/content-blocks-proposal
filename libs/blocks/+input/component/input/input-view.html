@@ -1,0 +1,17 @@
+<div class="root">
+  <ng-container *ngIf="!isCorrect">
+    <input class="input"
+           [value]="value"
+           (keydown)="onKeyDown($event)"
+           #input>
+
+    <button (click)="submit()">
+      ⏎
+    </button>
+  </ng-container>
+
+  <div *ngIf="isCorrect"
+       class="correct-answer">
+    {{ value }}
+  </div>
+</div>

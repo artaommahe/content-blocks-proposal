@@ -1,15 +1,15 @@
 import { Component, ChangeDetectionStrategy, ElementRef, ViewChild, OnInit } from '@angular/core';
-import { ExampleComponent } from '../example/example';
+import { InputComponent } from '../input/input';
 import { getParentComponent } from '@skyeng/libs/blocks/base/helpers';
 
 @Component({
-  selector: 'sky-example-answer',
+  selector: 'sky-input-answer',
   template: `
     <ng-content></ng-content>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ExampleAnswerComponent implements OnInit {
+export class InputAnswerComponent implements OnInit {
   constructor(
     private elementRef: ElementRef<HTMLElement>,
   ) {
@@ -18,10 +18,10 @@ export class ExampleAnswerComponent implements OnInit {
   public ngOnInit() {
     // no ng-content content on init
     window.setTimeout(() => {
-      const answer = parseInt(this.elementRef.nativeElement.textContent, 10);
-      const exampleComponent = getParentComponent<ExampleComponent>(this.elementRef.nativeElement, 'sky-example');
+      const answer = this.elementRef.nativeElement.textContent.trim();
+      const inputComponent = getParentComponent<InputComponent>(this.elementRef.nativeElement, 'sky-input');
 
-      exampleComponent.addCorrectAnswer(answer);
+      inputComponent.addCorrectAnswer(answer);
 
       this.elementRef.nativeElement.textContent = '';
     });

@@ -3,32 +3,32 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { map, combineLatest, debounceTime, takeUntil, filter } from 'rxjs/operators';
 import { BlockApi } from '@skyeng/libs/blocks/base/service/block-api';
 import { BlockService } from '@skyeng/libs/blocks/base/service/block';
-import { TExampleData } from '../../interface';
+import { TInputData } from '../../interface';
 
 @Component({
-  selector: 'sky-example',
+  selector: 'sky-input',
   template: `
     <ng-content></ng-content>
 
-    <sky-example-view [isCorrect]="isCorrect$ | async"
-                      [value]="value$ | async"
-                      (valueChange)="setValue($event)">
-    </sky-example-view>
+    <sky-input-view [isCorrect]="isCorrect$ | async"
+                    [value]="value$ | async"
+                    (valueChange)="setValue($event)">
+    </sky-input-view>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ExampleComponent implements OnInit, OnDestroy {
+export class InputComponent implements OnInit, OnDestroy {
   @Input() id: string;
 
   // ---> MODEL PART
-  private correctAnswers = new BehaviorSubject<number[]>([]);
-  private value = new BehaviorSubject<TExampleData>(0);
+  private correctAnswers = new BehaviorSubject<string[]>([]);
+  private value = new BehaviorSubject<TInputData>('');
 
   public isCorrect$: Observable<boolean>;
   public value$ = this.value.asObservable();
   // <---
 
-  private blockApi: BlockApi<TExampleData>;
+  private blockApi: BlockApi<TInputData>;
   private destroyed = new Subject<void>();
 
   constructor(
@@ -48,7 +48,7 @@ export class ExampleComponent implements OnInit, OnDestroy {
     );
     // <---
 
-    this.blockApi = this.blockService.createApi<TExampleData>({
+    this.blockApi = this.blockService.createApi<TInputData>({
       id: this.id,
       sync: {
         enabled: true,
@@ -82,14 +82,14 @@ export class ExampleComponent implements OnInit, OnDestroy {
 
   // https://github.com/angular/angular/issues/22114
   @Input()
-  public addCorrectAnswer = (correctAnswer: number): void => {
+  public addCorrectAnswer = (correctAnswer: string): void => {
     this.correctAnswers.next([
       ...this.correctAnswers.getValue(),
       correctAnswer,
     ]);
   }
 
-  public setValue(value: number, sync = true): void {
+  public setValue(value: TInputData, sync = true): void {
     this.value.next(value);
 
     if (sync) {
