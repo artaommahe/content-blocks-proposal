@@ -10,8 +10,11 @@
   <div class="events">
     Events
 
-    - send
+    <br>
+
+    - send (data)
     <input type="text"
+           style="width: 300px;"
            (input)="eventData = $event.target.value" />
 
     <button (click)="sendEvent()">send</button>

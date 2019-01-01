@@ -1,5 +1,5 @@
 import { Observable, fromEvent } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 export function getParentComponent<T>(element: HTMLElement, selector: string): T {
   return element.closest(selector) as unknown as T;
@@ -14,6 +14,7 @@ export interface IBlocksEvent<T> {
 
 const BLOCKS_CUSTOM_EVENT = 'blocksCustomEvent';
 
+// TODO: listen once with share
 export function blocksListenAllGlobalEvents(): Observable<IBlocksEvent<any>> {
   return fromEvent<CustomEvent<IBlocksEvent<any>>>(window, BLOCKS_CUSTOM_EVENT).pipe(
     map(event => event.detail),

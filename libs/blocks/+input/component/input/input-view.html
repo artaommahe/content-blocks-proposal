@@ -1,13 +1,21 @@
-<div class="root">
+<div class="root"
+     [class.-correct]="isCorrect"
+     [class.-wrong]="isWrong">
   <ng-container *ngIf="!isCorrect">
-    <input class="input"
-           [value]="value"
-           (keydown)="onKeyDown($event)"
-           #input>
+    <div class="input-container">
+      <input class="input"
+             [value]="value"
+             (keydown)="onKeyDown($event)"
+             #input>
 
-    <button (click)="submit()">
-      ⏎
-    </button>
+      <button (click)="submit()">
+        ⏎
+      </button>
+    </div>
+
+    <div class="correct-answers">
+      {{ correctAnswers.join(', ') }}
+    </div>
   </ng-container>
 
   <div *ngIf="isCorrect"

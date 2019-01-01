@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, OnInit, Input, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { map, combineLatest, debounceTime, takeUntil, filter } from 'rxjs/operators';
+import { map, combineLatest, debounceTime, takeUntil, filter, withLatestFrom } from 'rxjs/operators';
 import { BlockApi } from '@skyeng/libs/blocks/base/service/block-api';
 import { BlockService } from '@skyeng/libs/blocks/base/service/block';
 import { TInputData } from '../../interface';
@@ -10,7 +10,9 @@ import { TInputData } from '../../interface';
   template: `
     <ng-content></ng-content>
 
-    <sky-input-view [isCorrect]="isCorrect$ | async"
+    <sky-input-view [correctAnswers]="correctAnswers$ | async"
+                    [isCorrect]="isCorrect$ | async"
+                    [isWrong]="isWrong$ | async"
                     [value]="value$ | async"
                     (valueChange)="setValue($event)">
     </sky-input-view>
@@ -24,7 +26,9 @@ export class InputComponent implements OnInit, OnDestroy {
   private correctAnswers = new BehaviorSubject<string[]>([]);
   private value = new BehaviorSubject<TInputData>('');
 
+  public correctAnswers$ = this.correctAnswers.asObservable();
   public isCorrect$: Observable<boolean>;
+  public isWrong$: Observable<boolean>;
   public value$ = this.value.asObservable();
   // <---
 
@@ -46,6 +50,11 @@ export class InputComponent implements OnInit, OnDestroy {
       combineLatest(correctAnswers$),
       map(([ value, correctAnswers ]) => correctAnswers.includes(value)),
     );
+
+    this.isWrong$ = this.isCorrect$.pipe(
+      withLatestFrom(this.value$),
+      map(([ isCorrect, value ]) => value && !isCorrect),
+    );
     // <---
 
     this.blockApi = this.blockService.createApi<TInputData>({
@@ -58,11 +67,13 @@ export class InputComponent implements OnInit, OnDestroy {
       }
     });
 
+    // ---> SYNC PART
     this.blockApi.syncOnData()
       .pipe(
         takeUntil(this.destroyed),
       )
       .subscribe(value => this.setValue(value, false));
+    // <---
 
     // ---> SCORING PART
     this.isCorrect$

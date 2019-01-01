@@ -8,7 +8,9 @@ import { TInputData } from '../../interface';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InputViewComponent {
+  @Input() correctAnswers: string[];
   @Input() isCorrect: boolean;
+  @Input() isWrong: boolean;
   @Input() value: TInputData;
 
   @Output() valueChange = new EventEmitter<TInputData>();
