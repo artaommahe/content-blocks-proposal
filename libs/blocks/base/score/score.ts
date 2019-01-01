@@ -1,7 +1,9 @@
 import { IBlockConfig } from '../interface';
 import { blocksDispatchGlobalEvent } from '../helpers';
-import { SCORING_EVENTS } from './const';
-import { IScoringSet, IScoringAddBlock } from './interface';
+import { BLOCK_SCORE_EVENT } from './const';
+import { IBlockScoreSet, IBlockScoreRemove, IBlockScore } from './interface';
+
+const MAX_SCORE_DEFAULT = 1;
 
 export class Score {
   constructor(
@@ -12,17 +14,28 @@ export class Score {
     }
   }
 
-  public scoringSet(right: boolean, score: number): void {
-    blocksDispatchGlobalEvent<IScoringSet>(SCORING_EVENTS.set, {
-      id: this.config.id,
-      right,
+  public destroy(): void {
+    blocksDispatchGlobalEvent<IBlockScoreRemove>(BLOCK_SCORE_EVENT.remove, {
+      blockId: this.config.blockId,
+    });
+  }
+
+  public scoringSet(score: IBlockScore): void {
+    if (!this.scoringIsEnabled()) {
+      return;
+    }
+
+    blocksDispatchGlobalEvent<IBlockScoreSet>(BLOCK_SCORE_EVENT.set, {
+      blockId: this.config.blockId,
       score,
     });
   }
 
   private scoringInit(): void {
-    blocksDispatchGlobalEvent<IScoringAddBlock>(SCORING_EVENTS.addBlock, {
-      id: this.config.id,
+    this.scoringSet({
+      right: 0,
+      wrong: 0,
+      maxScore: MAX_SCORE_DEFAULT,
     });
   }
 

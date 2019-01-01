@@ -58,7 +58,7 @@ export class InputComponent implements OnInit, OnDestroy {
     // <---
 
     this.blockApi = this.blockService.createApi<TInputData>({
-      id: this.id,
+      blockId: this.id,
       sync: {
         enabled: true,
       },
@@ -81,7 +81,11 @@ export class InputComponent implements OnInit, OnDestroy {
         filter(isCorrect => isCorrect),
         takeUntil(this.destroyed),
       )
-      .subscribe(() => this.blockApi.score.scoringSet(true, 1));
+      .subscribe(() => this.blockApi.score.scoringSet({
+        right: 1,
+        wrong: 0,
+        maxScore: 1,
+      }));
     // <---
   }
 

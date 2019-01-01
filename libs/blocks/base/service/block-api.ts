@@ -19,5 +19,8 @@ export class BlockApi<TData = void> {
   public destroy(): void {
     this.destroyed.next();
     this.destroyed.complete();
+
+    this.score.destroy();
+    this.sync.destroy();
   }
 }

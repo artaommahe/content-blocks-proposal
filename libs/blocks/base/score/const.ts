@@ -1,4 +1,4 @@
-export enum SCORING_EVENTS {
-  addBlock = 'scroringAddBlock',
-  set = 'scroringSet',
+export enum BLOCK_SCORE_EVENT {
+  set = 'scoreSet',
+  remove = 'scoreRemove',
 }

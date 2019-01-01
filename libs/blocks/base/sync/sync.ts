@@ -2,8 +2,8 @@ import { IBlockConfig } from '../interface';
 import { Observable } from 'rxjs';
 import { blocksListenGlobalEvent, blocksDispatchGlobalEvent } from '../helpers';
 import { filter, map } from 'rxjs/operators';
-import { SYNC_EVENTS } from './const';
-import { ISyncData } from './interface';
+import { BLOCK_SYNC_EVENTS } from './const';
+import { IBlockSyncData } from './interface';
 
 // TODO: (?) convert to sync strategy
 export class Sync<TData> {
@@ -12,16 +12,20 @@ export class Sync<TData> {
   ) {
   }
 
+  public destroy(): void {
+    //
+  }
+
   public syncOnRestore(): Observable<TData> {
-    return blocksListenGlobalEvent<ISyncData<TData>>(SYNC_EVENTS.restore).pipe(
-      filter(({ id }) => this.syncIsEnabled() && (id === this.config.id)),
+    return blocksListenGlobalEvent<IBlockSyncData<TData>>(BLOCK_SYNC_EVENTS.restore).pipe(
+      filter(({ blockId }) => this.syncIsEnabled() && (blockId === this.config.blockId)),
       map(({ data }) => data),
     );
   }
 
   public syncOnData(): Observable<TData> {
-    return blocksListenGlobalEvent<ISyncData<TData>>(SYNC_EVENTS.data).pipe(
-      filter(({ id }) => this.syncIsEnabled() && (id === this.config.id)),
+    return blocksListenGlobalEvent<IBlockSyncData<TData>>(BLOCK_SYNC_EVENTS.data).pipe(
+      filter(({ blockId }) => this.syncIsEnabled() && (blockId === this.config.blockId)),
       map(({ data }) => data),
     );
   }
@@ -31,8 +35,8 @@ export class Sync<TData> {
       return;
     }
 
-    blocksDispatchGlobalEvent<ISyncData<TData>>(SYNC_EVENTS.set, {
-      id: this.config.id,
+    blocksDispatchGlobalEvent<IBlockSyncData<TData>>(BLOCK_SYNC_EVENTS.set, {
+      blockId: this.config.blockId,
       data,
     });
   }

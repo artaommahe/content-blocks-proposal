@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import { BlockApi } from './block-api';
-import { IBlockConfig } from '../interface';
+import { IBlockConfig, TBlockId } from '../interface';
 
 @Injectable({ providedIn: 'root' })
 export class BlockService {
   public createApi<T = void>(config: IBlockConfig = {}): BlockApi<T> {
-    config.id = config.id || this.createId();
+    config.blockId = config.blockId || this.createBlockId();
 
     return new BlockApi<T>(config);
   }
 
-  private createId(): string {
+  private createBlockId(): TBlockId {
     return (Math.random() * 100000).toString();
   }
 }

@@ -1,4 +1,4 @@
-export enum SYNC_EVENTS {
+export enum BLOCK_SYNC_EVENTS {
   set = 'syncSet',
   restore = 'syncRestore',
   data = 'syncData',

@@ -1,5 +1,7 @@
+export type TBlockId = string;
+
 export interface IBlockConfig {
-  id?: string;
+  blockId?: TBlockId;
   scoring?: {
     enabled?: boolean;
   };
