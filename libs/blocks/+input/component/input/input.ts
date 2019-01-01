@@ -68,7 +68,7 @@ export class InputComponent implements OnInit, OnDestroy {
     });
 
     // ---> SYNC PART
-    this.blockApi.syncOnData()
+    this.blockApi.sync.syncOnData()
       .pipe(
         takeUntil(this.destroyed),
       )
@@ -81,7 +81,7 @@ export class InputComponent implements OnInit, OnDestroy {
         filter(isCorrect => isCorrect),
         takeUntil(this.destroyed),
       )
-      .subscribe(() => this.blockApi.scoringSet(true, 1));
+      .subscribe(() => this.blockApi.score.scoringSet(true, 1));
     // <---
   }
 
@@ -104,7 +104,7 @@ export class InputComponent implements OnInit, OnDestroy {
     this.value.next(value);
 
     if (sync) {
-      this.blockApi.syncSet(value);
+      this.blockApi.sync.syncSet(value);
     }
   }
 }

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { IBlocksEvent, blocksListenAllGlobalEvents, blocksDispatchGlobalEvent } from '@skyeng/libs/blocks/base/helpers';
 import { Observable, timer } from 'rxjs';
 import { scan, mapTo } from 'rxjs/operators';
-import { SYNC_EVENTS } from '@skyeng/libs/blocks/base/service/block-api';
+import { SYNC_EVENTS } from '@skyeng/libs/blocks/base/sync/const';
 
 @Component({
   selector: 'app-root',
