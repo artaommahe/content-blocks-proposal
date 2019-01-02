@@ -9,8 +9,7 @@ import { TInputData } from '../../interface';
 })
 export class InputViewComponent {
   @Input() correctAnswers: string[];
-  @Input() isCorrect: boolean;
-  @Input() isWrong: boolean;
+  @Input() isCorrect: boolean | null;
   @Input() value: TInputData;
 
   @Output() valueChange = new EventEmitter<TInputData>();
