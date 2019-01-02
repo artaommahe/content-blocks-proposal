@@ -35,6 +35,10 @@ export class BlockBaseModel<T> {
   }
 
   public setValue(value: T): void {
+    if (value === this.value.getValue()) {
+      return;
+    }
+
     this.value.next(value);
   }
 }

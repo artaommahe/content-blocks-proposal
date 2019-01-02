@@ -1,16 +1,11 @@
-import { IBlockConfig } from '../interface';
 import { Sync } from '../sync/sync';
-import { Score } from '../score/score';
+import { BlockBaseScoreStrategy } from '../score/strategy/score';
 
 export class BlockApi<TData = void> {
-  public score: Score;
-  public sync: Sync<TData>;
-
   constructor(
-    private config: IBlockConfig,
+    public score: BlockBaseScoreStrategy,
+    public sync: Sync<TData>,
   ) {
-    this.score = new Score(this.config.blockId, this.config.score);
-    this.sync = new Sync<TData>(this.config.blockId, this.config.sync);
   }
 
   public destroy(): void {

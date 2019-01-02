@@ -1,10 +1,7 @@
 import { Component, ChangeDetectionStrategy, OnInit, Input, OnDestroy } from '@angular/core';
-import { filter, withLatestFrom, scan } from 'rxjs/operators';
 import { BlockApi } from '@skyeng/libs/blocks/base/service/block-api';
 import { BlockService } from '@skyeng/libs/blocks/base/service/block';
 import { TInputData } from '../../interface';
-import { MAX_SCORE_DEFAULT } from '@skyeng/libs/blocks/base/score/const';
-import { IBlockScore } from '@skyeng/libs/blocks/base/score/interface';
 import { BlockBaseModel } from '@skyeng/libs/blocks/base/model/base-model';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 
@@ -63,7 +60,7 @@ export class InputComponent implements OnInit, OnDestroy {
   }
 
   private init() {
-    this.blockApi = this.blockService.createApi<TInputData>({
+    this.blockApi = this.blockService.createApi<TInputData>(this.model, {
       blockId: this.id,
       sync: {
         enabled: true,
@@ -80,42 +77,5 @@ export class InputComponent implements OnInit, OnDestroy {
       )
       .subscribe(value => this.setValue(value, false));
     // <---
-
-    // ---> SCORING PART
-    const startingScore: IBlockScore = {
-      right: 0,
-      wrong: 0,
-      maxScore: MAX_SCORE_DEFAULT,
-    };
-
-    this.model.isCorrect$
-      .pipe(
-        filter(isCorrect => isCorrect !== null),
-        withLatestFrom(this.model.correctAnswers$),
-        scan<[ boolean, string[] ], IBlockScore>(
-          (score, [ isCorrect, correctAnswers ]) => this.handleScore(score, isCorrect, correctAnswers),
-          startingScore
-        ),
-        takeUntilDestroyed(this),
-      )
-      .subscribe(score => this.blockApi.score.set(score));
-    // <---
   }
-
-  // ---> SCORING PART
-  private handleScore(score: IBlockScore, isCorrect: boolean, correctAnswers: string[]): IBlockScore {
-    if (isCorrect) {
-      return {
-        ...score,
-        right: score.right + (score.maxScore - score.wrong),
-      };
-    }
-    else {
-      return {
-        ...score,
-        wrong: score.wrong + (score.maxScore / (correctAnswers.length - 1)),
-      };
-    }
-  }
-  // <---
 }
