@@ -1,20 +1,21 @@
 import { Component, ChangeDetectionStrategy, OnInit, Input, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { map, debounceTime, takeUntil, filter, skip, take, withLatestFrom, scan } from 'rxjs/operators';
+import { filter, withLatestFrom, scan } from 'rxjs/operators';
 import { BlockApi } from '@skyeng/libs/blocks/base/service/block-api';
 import { BlockService } from '@skyeng/libs/blocks/base/service/block';
 import { TInputData } from '../../interface';
 import { MAX_SCORE_DEFAULT } from '@skyeng/libs/blocks/base/score/const';
 import { IBlockScore } from '@skyeng/libs/blocks/base/score/interface';
+import { BlockBaseModel } from '@skyeng/libs/blocks/base/model/base-model';
+import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 
 @Component({
   selector: 'sky-input',
   template: `
     <ng-content></ng-content>
 
-    <sky-input-view [correctAnswers]="correctAnswers$ | async"
-                    [isCorrect]="isCorrect$ | async"
-                    [value]="value$ | async"
+    <sky-input-view [correctAnswers]="model.correctAnswers$ | async"
+                    [isCorrect]="model.isCorrect$ | async"
+                    [value]="model.value$ | async"
                     (valueChange)="setValue($event)">
     </sky-input-view>
   `,
@@ -23,17 +24,9 @@ import { IBlockScore } from '@skyeng/libs/blocks/base/score/interface';
 export class InputComponent implements OnInit, OnDestroy {
   @Input() id: string;
 
-  // ---> MODEL PART
-  private correctAnswers = new BehaviorSubject<string[]>([]);
-  private value = new BehaviorSubject<TInputData>('');
-
-  public correctAnswers$ = this.correctAnswers.asObservable();
-  public isCorrect$: Observable<boolean | null>;
-  public value$ = this.value.asObservable();
-  // <---
+  public model: BlockBaseModel<TInputData>;
 
   private blockApi: BlockApi<TInputData>;
-  private destroyed = new Subject<void>();
 
   constructor(
     private blockService: BlockService,
@@ -41,36 +34,28 @@ export class InputComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit() {
-    // wait for answers init
-    // TODO: move to model part
-    this.correctAnswers$
+    this.model = new BlockBaseModel<TInputData>();
+
+    // wait for answers to init
+    this.model.answersInited$
       .pipe(
-        skip(1),
-        debounceTime(0),
-        take(1),
-        takeUntil(this.destroyed),
+        takeUntilDestroyed(this),
       )
       .subscribe(() => this.init());
   }
 
   public ngOnDestroy() {
     this.blockApi.destroy();
-
-    this.destroyed.next();
-    this.destroyed.complete();
   }
 
   // https://github.com/angular/angular/issues/22114
   @Input()
   public addCorrectAnswer = (correctAnswer: string): void => {
-    this.correctAnswers.next([
-      ...this.correctAnswers.getValue(),
-      correctAnswer,
-    ]);
+    this.model.addCorrectAnswer(correctAnswer);
   }
 
   public setValue(value: TInputData, sync = true): void {
-    this.value.next(value);
+    this.model.setValue(value);
 
     if (sync) {
       this.blockApi.sync.set(value);
@@ -78,15 +63,6 @@ export class InputComponent implements OnInit, OnDestroy {
   }
 
   private init() {
-    // ---> MODEL PART
-    this.isCorrect$ = this.value$.pipe(
-      withLatestFrom(this.correctAnswers),
-      map(([ value, correctAnswers ]) =>
-        value ? correctAnswers.includes(value) : null
-      ),
-    );
-    // <---
-
     this.blockApi = this.blockService.createApi<TInputData>({
       blockId: this.id,
       sync: {
@@ -100,7 +76,7 @@ export class InputComponent implements OnInit, OnDestroy {
     // ---> SYNC PART
     this.blockApi.sync.onData()
       .pipe(
-        takeUntil(this.destroyed),
+        takeUntilDestroyed(this),
       )
       .subscribe(value => this.setValue(value, false));
     // <---
@@ -112,15 +88,15 @@ export class InputComponent implements OnInit, OnDestroy {
       maxScore: MAX_SCORE_DEFAULT,
     };
 
-    this.isCorrect$
+    this.model.isCorrect$
       .pipe(
         filter(isCorrect => isCorrect !== null),
-        withLatestFrom(this.correctAnswers),
+        withLatestFrom(this.model.correctAnswers$),
         scan<[ boolean, string[] ], IBlockScore>(
           (score, [ isCorrect, correctAnswers ]) => this.handleScore(score, isCorrect, correctAnswers),
           startingScore
         ),
-        takeUntil(this.destroyed),
+        takeUntilDestroyed(this),
       )
       .subscribe(score => this.blockApi.score.set(score));
     // <---
