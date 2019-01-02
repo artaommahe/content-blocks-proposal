@@ -62,13 +62,13 @@ export class InputComponent implements OnInit, OnDestroy {
       sync: {
         enabled: true,
       },
-      scoring: {
+      score: {
         enabled: true,
       }
     });
 
     // ---> SYNC PART
-    this.blockApi.sync.syncOnData()
+    this.blockApi.sync.onData()
       .pipe(
         takeUntil(this.destroyed),
       )
@@ -81,7 +81,7 @@ export class InputComponent implements OnInit, OnDestroy {
         filter(isCorrect => isCorrect),
         takeUntil(this.destroyed),
       )
-      .subscribe(() => this.blockApi.score.scoringSet({
+      .subscribe(() => this.blockApi.score.set({
         right: 1,
         wrong: 0,
         maxScore: 1,
@@ -108,7 +108,7 @@ export class InputComponent implements OnInit, OnDestroy {
     this.value.next(value);
 
     if (sync) {
-      this.blockApi.sync.syncSet(value);
+      this.blockApi.sync.set(value);
     }
   }
 }

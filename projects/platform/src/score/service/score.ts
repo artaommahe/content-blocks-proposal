@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, merge } from 'rxjs';
-import { IScore, TScoreEvent, IScores, IScoreEvents } from '../interface';
-import { shareReplay, scan, map, debounceTime, startWith, tap } from 'rxjs/operators';
+import { IScore, TScoreEvent, IScores } from '../interface';
+import { shareReplay, scan, map, debounceTime, startWith } from 'rxjs/operators';
 import { blocksListenGlobalEvent } from '@skyeng/libs/blocks/base/helpers';
 import { BLOCK_SCORE_EVENT } from '@skyeng/libs/blocks/base/score/const';
 import { EMPTY_SCORE, TOTAL_SCORE } from '../const';
@@ -13,7 +13,6 @@ export class ScoreService {
   constructor(
   ) {
     this.score$ = this.scoreEvents().pipe(
-      tap(event => console.log('> event', event)),
       scan<TScoreEvent, IScores>((scores, event) => this.handleEvent(scores, event), {}),
       debounceTime(0),
       map(scores => this.calculateScore(scores)),
@@ -24,7 +23,7 @@ export class ScoreService {
 
   private scoreEvents(): Observable<TScoreEvent> {
     const events$ = Object.keys(BLOCK_SCORE_EVENT).map((event) =>
-      blocksListenGlobalEvent<IScoreEvents[keyof IScoreEvents]>(BLOCK_SCORE_EVENT[event]).pipe(
+      blocksListenGlobalEvent<any>(BLOCK_SCORE_EVENT[event]).pipe(
         map(data => ({ event: BLOCK_SCORE_EVENT[event], data })),
       )
     );

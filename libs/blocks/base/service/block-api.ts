@@ -12,8 +12,8 @@ export class BlockApi<TData = void> {
   constructor(
     private config: IBlockConfig,
   ) {
-    this.score = new Score(this.config);
-    this.sync = new Sync<TData>(this.config);
+    this.score = new Score(this.config.blockId, this.config.score);
+    this.sync = new Sync<TData>(this.config.blockId, this.config.sync);
   }
 
   public destroy(): void {

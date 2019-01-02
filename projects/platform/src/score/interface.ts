@@ -22,8 +22,3 @@ export interface IScoreRemoveEvent {
 }
 
 export type TScoreEvent = IScoreSetEvent | IScoreRemoveEvent;
-
-export interface IScoreEvents {
-  [ BLOCK_SCORE_EVENT.set ]: IBlockScoreSet;
-  [ BLOCK_SCORE_EVENT.remove ]: IBlockScoreRemove;
-}

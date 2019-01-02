@@ -1,45 +1,46 @@
-import { IBlockConfig } from '../interface';
+import { TBlockId } from '../interface';
 import { blocksDispatchGlobalEvent } from '../helpers';
-import { BLOCK_SCORE_EVENT } from './const';
-import { IBlockScoreSet, IBlockScoreRemove, IBlockScore } from './interface';
-
-const MAX_SCORE_DEFAULT = 1;
+import { BLOCK_SCORE_EVENT, MAX_SCORE_DEFAULT } from './const';
+import { IBlockScoreSet, IBlockScoreRemove, IBlockScore, IBlockScoreConfig } from './interface';
 
 export class Score {
   constructor(
-    private config: IBlockConfig,
+    private blockId: TBlockId,
+    private config: IBlockScoreConfig,
   ) {
-    if (this.scoringIsEnabled()) {
-      this.scoringInit();
-    }
+    this.init();
   }
 
   public destroy(): void {
     blocksDispatchGlobalEvent<IBlockScoreRemove>(BLOCK_SCORE_EVENT.remove, {
-      blockId: this.config.blockId,
+      blockId: this.blockId,
     });
   }
 
-  public scoringSet(score: IBlockScore): void {
-    if (!this.scoringIsEnabled()) {
+  public set(score: IBlockScore): void {
+    if (!this.isEnabled()) {
       return;
     }
 
     blocksDispatchGlobalEvent<IBlockScoreSet>(BLOCK_SCORE_EVENT.set, {
-      blockId: this.config.blockId,
+      blockId: this.blockId,
       score,
     });
   }
 
-  private scoringInit(): void {
-    this.scoringSet({
+  private init(): void {
+    if (!this.isEnabled()) {
+      return;
+    }
+
+    this.set({
       right: 0,
       wrong: 0,
-      maxScore: MAX_SCORE_DEFAULT,
+      maxScore: this.config.maxScore || MAX_SCORE_DEFAULT,
     });
   }
 
-  private scoringIsEnabled(): boolean {
-    return this.config.scoring && this.config.scoring.enabled;
+  private isEnabled(): boolean {
+    return this.config.enabled;
   }
 }

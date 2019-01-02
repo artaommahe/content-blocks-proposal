@@ -1,14 +1,15 @@
-import { IBlockConfig } from '../interface';
+import { TBlockId } from '../interface';
 import { Observable } from 'rxjs';
 import { blocksListenGlobalEvent, blocksDispatchGlobalEvent } from '../helpers';
 import { filter, map } from 'rxjs/operators';
 import { BLOCK_SYNC_EVENTS } from './const';
-import { IBlockSyncData } from './interface';
+import { IBlockSyncData, IBlockSyncConfig } from './interface';
 
 // TODO: (?) convert to sync strategy
 export class Sync<TData> {
   constructor(
-    private config: IBlockConfig,
+    private blockId: TBlockId,
+    private config: IBlockSyncConfig,
   ) {
   }
 
@@ -16,32 +17,32 @@ export class Sync<TData> {
     //
   }
 
-  public syncOnRestore(): Observable<TData> {
+  public onRestore(): Observable<TData> {
     return blocksListenGlobalEvent<IBlockSyncData<TData>>(BLOCK_SYNC_EVENTS.restore).pipe(
-      filter(({ blockId }) => this.syncIsEnabled() && (blockId === this.config.blockId)),
+      filter(({ blockId }) => this.isEnabled() && (blockId === this.blockId)),
       map(({ data }) => data),
     );
   }
 
-  public syncOnData(): Observable<TData> {
+  public onData(): Observable<TData> {
     return blocksListenGlobalEvent<IBlockSyncData<TData>>(BLOCK_SYNC_EVENTS.data).pipe(
-      filter(({ blockId }) => this.syncIsEnabled() && (blockId === this.config.blockId)),
+      filter(({ blockId }) => this.isEnabled() && (blockId === this.blockId)),
       map(({ data }) => data),
     );
   }
 
-  public syncSet(data: TData): void {
-    if (!this.syncIsEnabled()) {
+  public set(data: TData): void {
+    if (!this.isEnabled()) {
       return;
     }
 
     blocksDispatchGlobalEvent<IBlockSyncData<TData>>(BLOCK_SYNC_EVENTS.set, {
-      blockId: this.config.blockId,
+      blockId: this.blockId,
       data,
     });
   }
 
-  private syncIsEnabled(): boolean {
-    return this.config.sync && this.config.sync.enabled;
+  private isEnabled(): boolean {
+    return this.config && this.config.enabled;
   }
 }
