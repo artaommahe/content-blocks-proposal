@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { IBlocksEvent, blocksListenAllGlobalEvents, blocksDispatchGlobalEvent } from '@skyeng/libs/blocks/base/helpers';
 import { Observable, timer } from 'rxjs';
 import { scan, mapTo } from 'rxjs/operators';
-import { BLOCK_SYNC_EVENTS } from '@skyeng/libs/blocks/base/sync/const';
 
 @Component({
   selector: 'app-root',
@@ -29,12 +28,10 @@ export class AppComponent implements OnInit {
       eventData = JSON.parse(this.eventData);
     } catch {}
 
-    this.eventData = '';
-
     if (!eventData) {
       return;
     }
 
-    blocksDispatchGlobalEvent(BLOCK_SYNC_EVENTS.data, eventData);
+    blocksDispatchGlobalEvent(eventData.name, eventData.data);
   }
 }

@@ -8,3 +8,7 @@ export interface IBlockSyncData<T> {
   blockId: TBlockId;
   data: T;
 }
+
+export interface IBlockSyncRequestRestore {
+  blockId: TBlockId;
+}

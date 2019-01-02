@@ -2,7 +2,7 @@ import { TBlockId } from '../../interface';
 import { MAX_SCORE_DEFAULT } from '../const';
 import { BlockScoreService } from '../service/score';
 import { IBlockScoreConfig, IBlockScore } from '../interface';
-import { BlockBaseModel } from '../../model/base-model';
+import { BlockBaseModel } from '../../model/base';
 import { filter, withLatestFrom, scan } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 

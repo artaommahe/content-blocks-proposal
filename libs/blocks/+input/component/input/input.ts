@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, OnInit, Input, OnDestroy } from '@a
 import { BlockApi } from '@skyeng/libs/blocks/base/service/block-api';
 import { BlockService } from '@skyeng/libs/blocks/base/service/block';
 import { TInputData } from '../../interface';
-import { BlockBaseModel } from '@skyeng/libs/blocks/base/model/base-model';
+import { BlockBaseModel } from '@skyeng/libs/blocks/base/model/base';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 
 @Component({
@@ -51,12 +51,8 @@ export class InputComponent implements OnInit, OnDestroy {
     this.model.addCorrectAnswer(correctAnswer);
   }
 
-  public setValue(value: TInputData, sync = true): void {
+  public setValue(value: TInputData): void {
     this.model.setValue(value);
-
-    if (sync) {
-      this.blockApi.sync.set(value);
-    }
   }
 
   private init() {
@@ -69,13 +65,5 @@ export class InputComponent implements OnInit, OnDestroy {
         enabled: true,
       }
     });
-
-    // ---> SYNC PART
-    this.blockApi.sync.onData()
-      .pipe(
-        takeUntilDestroyed(this),
-      )
-      .subscribe(value => this.setValue(value, false));
-    // <---
   }
 }

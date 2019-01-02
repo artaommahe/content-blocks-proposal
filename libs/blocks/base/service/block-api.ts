@@ -1,10 +1,10 @@
-import { Sync } from '../sync/sync';
-import { BlockBaseScoreStrategy } from '../score/strategy/score';
+import { BlockBaseSyncStrategy } from '../sync/strategy/base';
+import { BlockBaseScoreStrategy } from '../score/strategy/base';
 
-export class BlockApi<TData = void> {
+export class BlockApi<T = void> {
   constructor(
     public score: BlockBaseScoreStrategy,
-    public sync: Sync<TData>,
+    public sync: BlockBaseSyncStrategy<T>,
   ) {
   }
 
