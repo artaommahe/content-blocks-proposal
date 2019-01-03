@@ -7,7 +7,7 @@ import { IBlockSyncData, IBlockSyncRequestRestore } from '../interface';
 import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
-export class BlockSyncService {
+export class BlockSyncApi {
   public onRestored<T>(blockId: TBlockId): Observable<T> {
     return blocksListenGlobalEvent<IBlockSyncData<T>>(BLOCK_SYNC_EVENTS.restored).pipe(
       filter(event => (event.blockId === blockId)),

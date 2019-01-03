@@ -2,16 +2,16 @@ import { Injectable } from '@angular/core';
 import { BlockApi } from './block-api';
 import { IBlockConfig, TBlockId } from '../interface';
 import { BlockBaseScoreStrategy } from '../score/strategy/base';
-import { BlockScoreService } from '../score/service/score';
+import { BlockScoreApi } from '../score/service/score-api';
 import { BlockBaseModel } from '../model/base';
 import { BlockBaseSyncStrategy } from '../sync/strategy/base';
-import { BlockSyncService } from '../sync/service/sync';
+import { BlockSyncApi } from '../sync/service/sync-api';
 
 @Injectable({ providedIn: 'root' })
 export class BlockService {
   constructor(
-    private blockScoreService: BlockScoreService,
-    private blockSyncService: BlockSyncService,
+    private blockScoreService: BlockScoreApi,
+    private blockSyncService: BlockSyncApi,
   ) {
   }
 

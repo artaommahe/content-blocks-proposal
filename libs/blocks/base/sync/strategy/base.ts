@@ -2,7 +2,7 @@ import { TBlockId } from '../../interface';
 import { Observable, merge } from 'rxjs';
 import { filter, skip } from 'rxjs/operators';
 import { IBlockSyncConfig } from '../interface';
-import { BlockSyncService } from '../service/sync';
+import { BlockSyncApi } from '../service/sync-api';
 import { BlockBaseModel } from '../../model/base';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 
@@ -11,7 +11,7 @@ export class BlockBaseSyncStrategy<T> {
   private valueFromSync = false;
 
   constructor(
-    private blockSyncService: BlockSyncService,
+    private blockSyncService: BlockSyncApi,
     private model: BlockBaseModel<T>,
     private blockId: TBlockId,
     private config: IBlockSyncConfig,

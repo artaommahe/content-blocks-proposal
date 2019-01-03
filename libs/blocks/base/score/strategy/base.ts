@@ -1,6 +1,6 @@
 import { TBlockId } from '../../interface';
 import { MAX_SCORE_DEFAULT } from '../const';
-import { BlockScoreService } from '../service/score';
+import { BlockScoreApi } from '../service/score-api';
 import { IBlockScoreConfig, IBlockScore } from '../interface';
 import { BlockBaseModel } from '../../model/base';
 import { filter, withLatestFrom, scan } from 'rxjs/operators';
@@ -10,7 +10,7 @@ export class BlockBaseScoreStrategy {
   private destroyedOptions = { initMethod: this.init, destroyMethod: this.destroy };
 
   constructor(
-    private blockScoreService: BlockScoreService,
+    private blockScoreService: BlockScoreApi,
     private model: BlockBaseModel<any>,
     private blockId: TBlockId,
     private config: IBlockScoreConfig,

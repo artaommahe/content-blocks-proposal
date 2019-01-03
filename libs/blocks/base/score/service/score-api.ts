@@ -5,7 +5,7 @@ import { IBlockScoreRemove, IBlockScore, IBlockScoreSet } from '../interface';
 import { BLOCK_SCORE_EVENT } from '../const';
 
 @Injectable({ providedIn: 'root' })
-export class BlockScoreService {
+export class BlockScoreApi {
   public remove(blockId: TBlockId): void {
     blocksDispatchGlobalEvent<IBlockScoreRemove>(BLOCK_SCORE_EVENT.remove, {
       blockId,
