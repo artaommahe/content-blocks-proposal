@@ -47,22 +47,29 @@ export class BlockBaseScoreStrategy {
     this.set(startingScore);
 
     if (this.model) {
-      this.model.isCorrect$
-        .pipe(
-          filter((isCorrect): isCorrect is boolean => isCorrect !== null),
-          withLatestFrom(this.model.correctAnswers$),
-          scan<[ boolean, string[] ], IBlockScore>(
-            (score, [ isCorrect, correctAnswers ]) => this.handleScore(score, isCorrect, correctAnswers),
-            startingScore
-          ),
-          takeUntilDestroyed(this, this.destroyedOptions),
-        )
-        .subscribe(score => this.set(score));
+      this.bindToModel(this.model);
     }
   }
 
   private isEnabled(): boolean {
     return !!this.blockConfig.get([ 'score', 'enabled' ]);
+  }
+
+  private bindToModel(model: BlockBaseModel<any>): void {
+    const startingScore = this.getStartingScore();
+
+    model.isCorrect$
+      .pipe(
+        filter((isCorrect): isCorrect is boolean => isCorrect !== null),
+        withLatestFrom(model.correctAnswers$),
+        // TODO: distinctUntiChanged, dont send same score when maxScore is reached
+        scan<[ boolean, string[] ], IBlockScore>(
+          (score, [ isCorrect, correctAnswers ]) => this.handleScore(score, isCorrect, correctAnswers),
+          startingScore
+        ),
+        takeUntilDestroyed(this, this.destroyedOptions),
+      )
+      .subscribe(score => this.set(score));
   }
 
   private getStartingScore(): IBlockScore {
@@ -74,6 +81,10 @@ export class BlockBaseScoreStrategy {
   }
 
   private handleScore(score: IBlockScore, isCorrect: boolean, correctAnswers: string[]): IBlockScore {
+    if ((score.right + score.wrong) >= score.maxScore) {
+      return score;
+    }
+
     if (isCorrect) {
       return {
         ...score,

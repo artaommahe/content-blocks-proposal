@@ -73,7 +73,7 @@ export class BlockBaseSyncStrategy<T> {
   }
 
   private bindToModel(model: BlockBaseModel<T>): void {
-    // sync changed value
+    // sync new value
     model.value$
       .pipe(
         skip(1),
