@@ -3,6 +3,7 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { AppComponent } from './component/app/app';
 import { BlocksModule } from '@skyeng/libs/blocks/module';
 import { ScoreModule } from '../score/module';
+import { SyncService } from '../sync/service/sync';
 
 @NgModule({
   imports: [
@@ -18,4 +19,9 @@ import { ScoreModule } from '../score/module';
   bootstrap: [AppComponent],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
 })
-export class AppModule { }
+export class AppModule {
+  constructor(
+    _syncService: SyncService,
+  ) {
+  }
+}

@@ -16,6 +16,11 @@ export interface IBlockSyncStrategyConfig<T> {
 
 export interface IBlockSyncData<T> {
   blockId: TBlockId;
+  data: T | null;
+}
+
+export interface IBlockSendData<T> {
+  blockId: TBlockId;
   data: T;
 }
 

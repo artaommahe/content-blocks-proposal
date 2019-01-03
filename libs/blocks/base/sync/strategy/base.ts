@@ -42,13 +42,13 @@ export class BlockBaseSyncStrategy<T> {
 
   public onRestored(): Observable<T> {
     return this.blockSyncApi.onRestored<T>(this.blockId).pipe(
-      filter(() => this.isEnabled()),
+      filter((data): data is T => this.isEnabled() && !!data),
     );
   }
 
   public onData(): Observable<T> {
     return this.blockSyncApi.onData<T>(this.blockId).pipe(
-      filter(() => this.isEnabled()),
+      filter((data): data is T => this.isEnabled() && !!data),
     );
   }
 
