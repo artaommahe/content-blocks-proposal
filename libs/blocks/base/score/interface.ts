@@ -1,8 +1,17 @@
 import { TBlockId } from '../interface';
+import { BlockBaseModel } from '../model/base';
+import { BlockScoreApi } from './service/score-api';
 
-export class IBlockScoreConfig {
+export interface IBlockScoreConfig {
   enabled?: boolean;
   maxScore?: number;
+}
+
+export interface IBlockScoreStrategyConfig {
+  blockScoreApi: BlockScoreApi;
+  blockId: TBlockId;
+  model?: BlockBaseModel<any>;
+  scoreConfig?: IBlockScoreConfig;
 }
 
 export interface IBlockScore {

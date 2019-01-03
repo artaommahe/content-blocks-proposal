@@ -18,7 +18,7 @@ export class InputAnswerComponent implements OnInit {
   public ngOnInit() {
     // no ng-content content on init
     window.setTimeout(() => {
-      const answer = this.elementRef.nativeElement.textContent.trim();
+      const answer = (this.elementRef.nativeElement.textContent || '').trim();
       const inputComponent = getParentComponent<InputComponent>(this.elementRef.nativeElement, 'sky-input');
 
       inputComponent.addCorrectAnswer(answer);

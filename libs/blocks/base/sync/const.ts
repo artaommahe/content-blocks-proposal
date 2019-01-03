@@ -1,5 +1,5 @@
 export enum BLOCK_SYNC_EVENTS {
-  set = 'syncSet',
+  send = 'syncSend',
   restored = 'syncRestored',
   requestRestore = 'syncRequestRestore',
   data = 'syncData',

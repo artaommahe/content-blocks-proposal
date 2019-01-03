@@ -1,33 +1,85 @@
 import { TBlockId } from '../../interface';
 import { Observable, merge } from 'rxjs';
 import { filter, skip } from 'rxjs/operators';
-import { IBlockSyncConfig } from '../interface';
+import { IBlockSyncConfig, IBlockSyncStrategyConfig } from '../interface';
 import { BlockSyncApi } from '../service/sync-api';
 import { BlockBaseModel } from '../../model/base';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 
 export class BlockBaseSyncStrategy<T> {
+  private blockSyncApi: BlockSyncApi;
+  private model: BlockBaseModel<T> | undefined;
+  private blockId: TBlockId;
+  private config: IBlockSyncConfig;
+
   private destroyedOptions = { initMethod: this.init, destroyMethod: this.destroy };
   private valueFromSync = false;
 
   constructor(
-    private blockSyncService: BlockSyncApi,
-    private model: BlockBaseModel<T>,
-    private blockId: TBlockId,
-    private config: IBlockSyncConfig,
+    config: IBlockSyncStrategyConfig<T>,
   ) {
+    this.blockSyncApi = config.blockSyncApi;
+    this.model = config.model;
+    this.blockId = config.blockId;
+    this.config = config.syncConfig || {};
+
     this.init();
   }
 
   private init(): void {
+    if (this.model) {
+      this.bindToModel(this.model);
+    }
+
+    // request initial value
+    this.requestRestore();
+  }
+
+  public destroy(): void {
+    //
+  }
+
+  public onRestored(): Observable<T> {
+    return this.blockSyncApi.onRestored<T>(this.blockId).pipe(
+      filter(() => this.isEnabled()),
+    );
+  }
+
+  public onData(): Observable<T> {
+    return this.blockSyncApi.onData<T>(this.blockId).pipe(
+      filter(() => this.isEnabled()),
+    );
+  }
+
+  public send(data: T): void {
+    if (!this.isEnabled()) {
+      return;
+    }
+
+    this.blockSyncApi.send(this.blockId, data);
+  }
+
+  public requestRestore(): void {
+    if (!this.isEnabled()) {
+      return;
+    }
+
+    this.blockSyncApi.requestRestore(this.blockId);
+  }
+
+  private isEnabled(): boolean {
+    return !!this.config.enabled;
+  }
+
+  private bindToModel(model: BlockBaseModel<T>): void {
     // sync changed value
-    this.model.value$
+    model.value$
       .pipe(
         skip(1),
         filter(() => this.valueIsNotFromSync()),
         takeUntilDestroyed(this, this.destroyedOptions),
       )
-      .subscribe(value => this.set(value));
+      .subscribe((value: T) => this.send(value));
 
     // set value from sync
     merge(
@@ -39,39 +91,8 @@ export class BlockBaseSyncStrategy<T> {
       )
       .subscribe(value => {
         this.valueFromSync = true;
-        this.model.setValue(value);
+        model.setValue(value);
       });
-
-    // request initial value
-    this.blockSyncService.requestRestore(this.blockId);
-  }
-
-  public destroy(): void {
-    //
-  }
-
-  private onRestored(): Observable<T> {
-    return this.blockSyncService.onRestored<T>(this.blockId).pipe(
-      filter(() => this.isEnabled()),
-    );
-  }
-
-  private onData(): Observable<T> {
-    return this.blockSyncService.onData<T>(this.blockId).pipe(
-      filter(() => this.isEnabled()),
-    );
-  }
-
-  private set(data: T): void {
-    if (!this.isEnabled()) {
-      return;
-    }
-
-    this.blockSyncService.set(this.blockId, data);
-  }
-
-  private isEnabled(): boolean {
-    return this.config && this.config.enabled;
   }
 
   private valueIsNotFromSync(): boolean {

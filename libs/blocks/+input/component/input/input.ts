@@ -31,7 +31,7 @@ export class InputComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit() {
-    this.model = new BlockBaseModel<TInputData>();
+    this.model = new BlockBaseModel<TInputData>('');
 
     // wait for answers to init
     this.model.answersInited$
@@ -56,7 +56,7 @@ export class InputComponent implements OnInit, OnDestroy {
   }
 
   private init() {
-    this.blockApi = this.blockService.createApi<TInputData>(this.model, {
+    const blockConfig = {
       blockId: this.id,
       sync: {
         enabled: true,
@@ -64,6 +64,12 @@ export class InputComponent implements OnInit, OnDestroy {
       score: {
         enabled: true,
       }
+    };
+
+    this.blockApi = this.blockService.createApi<TInputData>({
+      blockId: this.id,
+      model: this.model,
+      blockConfig,
     });
   }
 }

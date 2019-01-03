@@ -1,33 +1,40 @@
-import { TBlockId } from '../../interface';
 import { MAX_SCORE_DEFAULT } from '../const';
-import { BlockScoreApi } from '../service/score-api';
-import { IBlockScoreConfig, IBlockScore } from '../interface';
-import { BlockBaseModel } from '../../model/base';
+import { IBlockScore, IBlockScoreStrategyConfig, IBlockScoreConfig } from '../interface';
 import { filter, withLatestFrom, scan } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
+import { BlockScoreApi } from '../service/score-api';
+import { TBlockId } from '../../interface';
+import { BlockBaseModel } from '../../model/base';
 
 export class BlockBaseScoreStrategy {
+  private blockScoreApi: BlockScoreApi;
+  private blockId: TBlockId;
+  private model: BlockBaseModel<any> | undefined;
+  private config: IBlockScoreConfig;
+
   private destroyedOptions = { initMethod: this.init, destroyMethod: this.destroy };
 
   constructor(
-    private blockScoreService: BlockScoreApi,
-    private model: BlockBaseModel<any>,
-    private blockId: TBlockId,
-    private config: IBlockScoreConfig,
+    config: IBlockScoreStrategyConfig,
   ) {
+    this.blockScoreApi = config.blockScoreApi;
+    this.blockId = config.blockId;
+    this.model = config.model;
+    this.config = config.scoreConfig || {};
+
     this.init();
   }
 
   public destroy(): void {
-    this.blockScoreService.remove(this.blockId);
+    this.blockScoreApi.remove(this.blockId);
   }
 
-  private set(score: IBlockScore): void {
+  public set(score: IBlockScore): void {
     if (!this.isEnabled()) {
       return;
     }
 
-    this.blockScoreService.set(this.blockId, score);
+    this.blockScoreApi.set(this.blockId, score);
   }
 
   private init(): void {
@@ -38,21 +45,23 @@ export class BlockBaseScoreStrategy {
     const startingScore = this.getStartingScore();
     this.set(startingScore);
 
-    this.model.isCorrect$
-      .pipe(
-        filter(isCorrect => isCorrect !== null),
-        withLatestFrom(this.model.correctAnswers$),
-        scan<[ boolean, string[] ], IBlockScore>(
-          (score, [ isCorrect, correctAnswers ]) => this.handleScore(score, isCorrect, correctAnswers),
-          startingScore
-        ),
-        takeUntilDestroyed(this, this.destroyedOptions),
-      )
-      .subscribe(score => this.set(score));
+    if (this.model) {
+      this.model.isCorrect$
+        .pipe(
+          filter((isCorrect): isCorrect is boolean => isCorrect !== null),
+          withLatestFrom(this.model.correctAnswers$),
+          scan<[ boolean, string[] ], IBlockScore>(
+            (score, [ isCorrect, correctAnswers ]) => this.handleScore(score, isCorrect, correctAnswers),
+            startingScore
+          ),
+          takeUntilDestroyed(this, this.destroyedOptions),
+        )
+        .subscribe(score => this.set(score));
+    }
   }
 
   private isEnabled(): boolean {
-    return this.config.enabled;
+    return !!this.config.enabled;
   }
 
   private getStartingScore(): IBlockScore {

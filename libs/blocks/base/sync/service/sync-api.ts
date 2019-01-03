@@ -22,8 +22,8 @@ export class BlockSyncApi {
     );
   }
 
-  public set<T>(blockId: TBlockId, data: T): void {
-    blocksDispatchGlobalEvent<IBlockSyncData<T>>(BLOCK_SYNC_EVENTS.set, {
+  public send<T>(blockId: TBlockId, data: T): void {
+    blocksDispatchGlobalEvent<IBlockSyncData<T>>(BLOCK_SYNC_EVENTS.send, {
       blockId,
       data,
     });

@@ -1,25 +1,37 @@
 import { Injectable } from '@angular/core';
 import { BlockApi } from './block-api';
-import { IBlockConfig, TBlockId } from '../interface';
+import { TBlockId, IBlockApiConfig } from '../interface';
 import { BlockBaseScoreStrategy } from '../score/strategy/base';
 import { BlockScoreApi } from '../score/service/score-api';
-import { BlockBaseModel } from '../model/base';
 import { BlockBaseSyncStrategy } from '../sync/strategy/base';
 import { BlockSyncApi } from '../sync/service/sync-api';
 
 @Injectable({ providedIn: 'root' })
 export class BlockService {
   constructor(
-    private blockScoreService: BlockScoreApi,
-    private blockSyncService: BlockSyncApi,
+    private blockScoreApi: BlockScoreApi,
+    private blockSyncApi: BlockSyncApi,
   ) {
   }
 
-  public createApi<T = void>(model: BlockBaseModel<T>, config: IBlockConfig = {}): BlockApi<T> {
+  public createApi<T = void>(config: IBlockApiConfig<T>): BlockApi<T> {
     config.blockId = config.blockId || this.createBlockId();
+    config.blockConfig = config.blockConfig || {};
 
-    const score = new BlockBaseScoreStrategy(this.blockScoreService, model, config.blockId, config.score);
-    const sync = new BlockBaseSyncStrategy<T>(this.blockSyncService, model, config.blockId, config.sync);
+    // TODO: (?) move entities init to BlockApi constructor
+    const score = new BlockBaseScoreStrategy({
+      blockScoreApi: this.blockScoreApi,
+      blockId: config.blockId,
+      model: config.model,
+      scoreConfig: config.blockConfig.score,
+    });
+
+    const sync = new BlockBaseSyncStrategy<T>({
+      blockSyncApi: this.blockSyncApi,
+      blockId: config.blockId,
+      model: config.model,
+      syncConfig: config.blockConfig.sync,
+    });
 
     return new BlockApi<T>(score, sync);
   }

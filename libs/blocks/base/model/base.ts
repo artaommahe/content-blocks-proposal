@@ -3,15 +3,19 @@ import { withLatestFrom, map, skip, debounceTime, take, mapTo } from 'rxjs/opera
 
 export class BlockBaseModel<T> {
   private correctAnswers = new BehaviorSubject<T[]>([]);
-  private value = new BehaviorSubject<T>(null);
+  private value: BehaviorSubject<T>;
 
   public answersInited$: Observable<void>;
   public correctAnswers$ = this.correctAnswers.asObservable();
   public isCorrect$: Observable<boolean | null>;
-  public value$ = this.value.asObservable();
+  public value$: Observable<T>;
 
   constructor(
+    initialValue: T,
   ) {
+    this.value = new BehaviorSubject<T>(initialValue);
+    this.value$ = this.value.asObservable();
+
     this.isCorrect$ = this.value$.pipe(
       withLatestFrom(this.correctAnswers),
       map(([ value, correctAnswers ]) =>
