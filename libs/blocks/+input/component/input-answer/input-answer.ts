@@ -21,6 +21,10 @@ export class InputAnswerComponent implements OnInit {
       const answer = (this.elementRef.nativeElement.textContent || '').trim();
       const inputComponent = getParentComponent<InputComponent>(this.elementRef.nativeElement, 'sky-input');
 
+      if (!inputComponent) {
+        return;
+      }
+
       inputComponent.addCorrectAnswer(answer);
 
       this.elementRef.nativeElement.textContent = '';

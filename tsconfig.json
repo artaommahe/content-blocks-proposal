@@ -11,6 +11,7 @@
     "experimentalDecorators": true,
     "strict": true,
     "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "strictPropertyInitialization": false,
     "suppressImplicitAnyIndexErrors": true,
     "target": "es5",

@@ -1,6 +1,7 @@
 import { TBlockId } from '../interface';
 import { BlockSyncApi } from './service/sync-api';
 import { BlockBaseModel } from '../model/base';
+import { BlockConfig } from '../config/config';
 
 export interface IBlockSyncConfig {
   enabled?: boolean;
@@ -9,8 +10,8 @@ export interface IBlockSyncConfig {
 export interface IBlockSyncStrategyConfig<T> {
   blockSyncApi: BlockSyncApi;
   blockId: TBlockId;
+  blockConfig: BlockConfig;
   model?: BlockBaseModel<T>;
-  syncConfig?: IBlockSyncConfig;
 }
 
 export interface IBlockSyncData<T> {

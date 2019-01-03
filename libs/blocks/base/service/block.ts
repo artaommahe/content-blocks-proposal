@@ -5,6 +5,7 @@ import { BlockBaseScoreStrategy } from '../score/strategy/base';
 import { BlockScoreApi } from '../score/service/score-api';
 import { BlockBaseSyncStrategy } from '../sync/strategy/base';
 import { BlockSyncApi } from '../sync/service/sync-api';
+import { BlockConfig } from '../config/config';
 
 @Injectable({ providedIn: 'root' })
 export class BlockService {
@@ -16,21 +17,21 @@ export class BlockService {
 
   public createApi<T = void>(config: IBlockApiConfig<T>): BlockApi<T> {
     config.blockId = config.blockId || this.createBlockId();
-    config.blockConfig = config.blockConfig || {};
+    config.blockConfig = config.blockConfig || new BlockConfig;
 
     // TODO: (?) move entities init to BlockApi constructor
     const score = new BlockBaseScoreStrategy({
       blockScoreApi: this.blockScoreApi,
       blockId: config.blockId,
       model: config.model,
-      scoreConfig: config.blockConfig.score,
+      blockConfig: config.blockConfig,
     });
 
     const sync = new BlockBaseSyncStrategy<T>({
       blockSyncApi: this.blockSyncApi,
       blockId: config.blockId,
       model: config.model,
-      syncConfig: config.blockConfig.sync,
+      blockConfig: config.blockConfig,
     });
 
     return new BlockApi<T>(score, sync);

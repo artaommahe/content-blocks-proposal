@@ -25,6 +25,7 @@ TODO
 - резет упражнений (состояние, скоринг)
 - добавить в тестовый инпут скоринг фейлов
 - проверить скоринг на множестве упражнений
+- мерж локального конфига элемента и группового, только локальный конфиг
 
 
 ## Текущие проблемы
@@ -89,13 +90,13 @@ TODO
 (произвольный проект на произвольном фреймворке/нативе)
 
 ```html
-<sky-blocks-container config="JSON.stringify({ ... })">
+<sky-block-group config="JSON.stringify({ ... })">
   <vim-select></vim-select>
 
   <vim-teacher-notes>
     <vim-input></vim-input>
   </vim-teacher-notes>
-</sky-blocks-container>
+</sky-block-group>
 ```
 без настроек/синхронизаций и всего такого
 ```html

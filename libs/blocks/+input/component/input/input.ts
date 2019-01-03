@@ -1,9 +1,10 @@
-import { Component, ChangeDetectionStrategy, OnInit, Input, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, Input, OnDestroy, ElementRef } from '@angular/core';
 import { BlockApi } from '@skyeng/libs/blocks/base/service/block-api';
 import { BlockService } from '@skyeng/libs/blocks/base/service/block';
 import { TInputData } from '../../interface';
 import { BlockBaseModel } from '@skyeng/libs/blocks/base/model/base';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
+import { getBlockConfig } from '@skyeng/libs/blocks/base/helpers';
 
 @Component({
   selector: 'sky-input',
@@ -27,6 +28,7 @@ export class InputComponent implements OnInit, OnDestroy {
 
   constructor(
     private blockService: BlockService,
+    private elementRef: ElementRef<HTMLElement>,
   ) {
   }
 
@@ -56,15 +58,7 @@ export class InputComponent implements OnInit, OnDestroy {
   }
 
   private init() {
-    const blockConfig = {
-      blockId: this.id,
-      sync: {
-        enabled: true,
-      },
-      score: {
-        enabled: true,
-      }
-    };
+    const blockConfig = getBlockConfig(this.elementRef.nativeElement);
 
     this.blockApi = this.blockService.createApi<TInputData>({
       blockId: this.id,

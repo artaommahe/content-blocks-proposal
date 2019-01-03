@@ -1,16 +1,17 @@
 import { MAX_SCORE_DEFAULT } from '../const';
-import { IBlockScore, IBlockScoreStrategyConfig, IBlockScoreConfig } from '../interface';
+import { IBlockScore, IBlockScoreStrategyConfig } from '../interface';
 import { filter, withLatestFrom, scan } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { BlockScoreApi } from '../service/score-api';
 import { TBlockId } from '../../interface';
 import { BlockBaseModel } from '../../model/base';
+import { BlockConfig } from '../../config/config';
 
 export class BlockBaseScoreStrategy {
   private blockScoreApi: BlockScoreApi;
   private blockId: TBlockId;
   private model: BlockBaseModel<any> | undefined;
-  private config: IBlockScoreConfig;
+  private blockConfig: BlockConfig;
 
   private destroyedOptions = { initMethod: this.init, destroyMethod: this.destroy };
 
@@ -20,7 +21,7 @@ export class BlockBaseScoreStrategy {
     this.blockScoreApi = config.blockScoreApi;
     this.blockId = config.blockId;
     this.model = config.model;
-    this.config = config.scoreConfig || {};
+    this.blockConfig = config.blockConfig;
 
     this.init();
   }
@@ -61,14 +62,14 @@ export class BlockBaseScoreStrategy {
   }
 
   private isEnabled(): boolean {
-    return !!this.config.enabled;
+    return !!this.blockConfig.get([ 'score', 'enabled' ]);
   }
 
   private getStartingScore(): IBlockScore {
     return {
       right: 0,
       wrong: 0,
-      maxScore: this.config.maxScore || MAX_SCORE_DEFAULT,
+      maxScore: this.blockConfig.get([ 'score', 'maxScore' ]) || MAX_SCORE_DEFAULT,
     };
   }
 

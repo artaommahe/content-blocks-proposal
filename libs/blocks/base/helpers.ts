@@ -1,12 +1,25 @@
 import { Observable, fromEvent } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { BlockConfig } from './config/config';
+import { BlockGroupComponent } from './component/group/group';
 
-export function getParentComponent<T>(element: HTMLElement, selector: string): T {
+export function getParentComponent<T>(element: HTMLElement, selector: string): T | undefined {
   return element.closest(selector) as unknown as T;
 }
 
-// GLOBAL EVENTS
+// CONFIG -->
+export const BLOCK_GROUP_SELECTOR = 'sky-block-group';
 
+export function getBlockConfig(element: HTMLElement): BlockConfig {
+  const blockGroupElement = getParentComponent<BlockGroupComponent>(element, BLOCK_GROUP_SELECTOR);
+
+  return blockGroupElement
+    ? blockGroupElement.blockConfig
+    : new BlockConfig();
+}
+// <--
+
+// GLOBAL EVENTS -->
 export interface IBlocksEvent<T> {
   name: string;
   data: T;
@@ -38,3 +51,4 @@ export function blocksDispatchGlobalEvent<T>(eventName: string, data: T): void {
 
   window.dispatchEvent(event);
 }
+// <--
