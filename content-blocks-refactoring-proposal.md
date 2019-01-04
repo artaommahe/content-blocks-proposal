@@ -27,6 +27,10 @@ TODO
 - проверить скоринг на множестве упражнений
 - мерж локального конфига элемента и группового, только локальный конфиг
 - история выполнения в синке, учесть её в инициализации скора/синка в блока
+- разобрать текущие форматы id упражнений и хранимых в ворбуке данных, продумать/написать конвертер из общего формата в легаси
+- разделить запросы в синк set и send (2ой чисто для отправки по синхронизации произвольных данных, например статуса того что партнёр в инпут пишет)
+- как хранить всякую фигню по типу isKeyUsed
+- групповые уроки и переключение данных по ученикам
 
 
 ## Текущие проблемы
@@ -36,6 +40,7 @@ TODO
 - невозможность использования вне вимбокса
 - отсутствие адекватной архитектуры и стандартов разработки блоков
 - устаревшее апи синхронизации/скоринга, на котором завязываются многие блоки
+- много легаси в формате данных синхронизации и работе скоринга, которое не локализовано, а размазано по сервисам/стратегиям
 - разрастание числа блоков (в уроках используется несколько, но скачивается код для всех)
 - невозможность разработки блоков (кроме содержимого iframe'ов) не командой вимбокса, вне вимбокса и без знания архитектуры вимбокса и его легаси частей
 - высокая сложность в дальнейшем создания визуального редактора блоков (из-за связности с вимбоксом, логики рендера блоков)
@@ -123,6 +128,21 @@ TODO
 TODO: API
 
 
+##### Формат хранения ответов упражнений
+
+```ts
+interface ISyncBlockAnswer<T = any> {
+  value: T;
+  createdAt: number;
+  isCorrect: boolean;
+}
+
+interface ISyncData {
+  [ stepRevId_blockId: string ]: ISyncBlockAnswer[];
+}
+```
+
+
 #### Скоринг
 
 Если включен в конфиге, то шлём глобальные события на которые кто-нибудь может подписаться.
@@ -188,7 +208,300 @@ TODO
 - для custom elements получение инстансов компонентов-родителей реализуется через метод-хэлпер по некоторому токену (видимо строковому). У соответствующего компонента-родителя через другой метод-хэлпер по такому же токену проставляется уникальное поле, которое метод-геттер и ищет среди родителей текущего компонента (TODO: стакблиц с примером)
 
 
-#### Категории зависимостей
+#### Текущий формат хранения данных в workbook по упражнениям
+
+<details>
+<summary>развернуть</summary>
+<p>
+
+- input
+```ts
+{
+  // m842877I11
+  "canvas.m842877I11": {
+    isKeyUsed: false,
+    isTyping: false,
+    value: "arrived"
+  },
+  "canvas.m842877I11:fails": {
+    arrivee: { createdAt: 1546627492497 },
+    arriveer: { createdAt: 1546627494039 },
+    arriveert: { createdAt: 1546627495011 },
+    arriveerty: { createdAt: 1546627496380 },
+    arriveertyu: { createdAt: 1546627497446 },
+    arriveertyui: { createdAt: 1546627498335 },
+    arriveertyuio: { createdAt: 1546627499242 }
+  },
+  "canvas.m842877I11:successes": {
+    arrived: { createdAt: 1546627501498 }
+  },
+  // m842877I12
+  "canvas.m842877I12": {
+    isKeyUsed: false,
+    isTyping: false,
+    value: "satt"
+  },
+  "canvas.m842877I12:fails": {
+    sat: { createdAt: 1546627505095 },
+    have sat: { createdAt: 1546627514791 },
+    satt: { createdAt: 1546627534970 }
+  },
+  "canvas.m842877I6": {
+    isKeyUsed: true,
+    isTyping: false,
+    value: "were sitting"
+  },
+  "canvas.m842877I6:successes": {
+    were sitting: { createdAt: 1546627536688 }
+  }
+}
+```
+- select
+```ts
+{
+  // m842877S1
+  "canvas.m842877S1": 1,
+  "canvas.m842877S1:successes": {
+    1: { createdAt: 1546627930580 }
+  },
+  // m842877S2
+  "canvas.m842877S2": 1,
+  "canvas.m842877S2:successes": {
+    1: { createdAt: 1546627932894 }
+  },
+  // m842877S3
+  "canvas.m842877S3": 2,
+  "canvas.m842877S3:fails": {
+    1: { createdAt: 1546627934617 }
+  },
+  "canvas.m842877S3:successes": {
+    2: { createdAt: 1546627936851 }
+  }
+}
+```
+- test
+```ts
+{
+  // m842878T1
+  "canvas.m842878T1": [ 2 ],
+  "canvas.m842878T1:fails": {
+
+    1: { createdAt: 1546628203303 }
+  },
+  "canvas.m842878T1:successes": {
+
+    2: { createdAt: 1546628204564 }
+  },
+  // m842878T2
+  "canvas.m842878T2": [ 0 ],
+  "canvas.m842878T2:successes": {
+
+    0: { createdAt: 1546628206191 }
+  },
+  // m842878T3
+  "canvas.m842878T3": [ 1 ],
+  "canvas.m842878T3:fails": {
+    0: { createdAt: 1546628207957 },
+    2: { createdAt: 1546628210770 }
+  },
+  "canvas.m842878T3:successes": {
+    1: { createdAt: 1546628211886 }
+  }
+}
+```
+- strike-out
+```ts
+{
+  // m842879SO3
+  "canvas.m842879SO3": "d1987076",
+  "canvas.m842879SO3:successes": {
+    "d1987076": { createdAt: 1546628384631 }
+  },
+  // m842879SO6
+  "canvas.m842879SO6": "6bd3536a",
+  "canvas.m842879SO6:fails": {
+    "f7369cec": { createdAt: 1546628393325 },
+    "7674aede": { createdAt: 1546628394787 }
+  },
+  "canvas.m842879SO6:successes": {
+    "6bd3536a": { createdAt: 1546628395799 }
+  },
+  // m842879SO9
+  "canvas.m842879SO9": "83795b80",
+  "canvas.m842879SO9:fails": {
+    "83795b80": { createdAt: 1546628399619 }
+  }
+}
+```
+- groups
+```ts
+{
+  // m842879G20
+  "canvas.m842879G20": {
+    items: [ "36fee817","f9352a3c","23c7562a","6dce2ad8","f37373b3","f9352a3c","23c7562a","1acae687","895df855","8734e925","f9352a3c","23c7562a","1acae687" ]
+  },
+  "canvas.m842879G20:fails": {
+    "f9352a3c": { createdAt: 1546628522888 },
+    "23c7562a": { createdAt: 1546628524056 },
+    "1acae687": { createdAt: 1546628518418 }
+  },
+  "canvas.m842879G20:successes": {
+    "6dce2ad8": { createdAt: 1546628513029 },
+    "895df855": { createdAt: 1546628519739 },
+    "1acae687": { createdAt: 1546628525676 }
+  }
+}
+```
+- dnd-group
+```ts
+{
+  // m842880DC
+  "canvas.m842880DC1_export": [ "7eabb367","bb7a7f5d","9bfc40b8" ],
+  "canvas.m842880DC4_export:successes": [
+    { createdAt: 1546628862076, groupId: "877410b7" }
+  ],
+  "canvas.m842880DC3_export:successes": [
+    { createdAt: 1546628863753, groupId: "877410b7" }
+  ],
+  "canvas.m842880DC5_export:fails": [
+    { createdAt: 1546628865177, groupId: "877410b7" }
+  ],
+  "canvas.m842880DC6_export:fails": [
+    { createdAt: 1546628866863, groupId: "877410b7" }
+  ],
+  "canvas.m842880DC2_export": [ "99f8ee0c" ],
+  "canvas.m842880DC6_export:successes": [
+    { createdAt: 1546628869179, groupId: "0551a28f" }
+  ],
+  "canvas.m842880DC1_export": [ "7eabb367","bb7a7f5d" ],
+  "canvas.m842880DC2_export": [ "99f8ee0c","9bfc40b8" ],
+  "canvas.m842880DC5_export:successes": [
+    { createdAt: 1546628870741, groupId: "0551a28f" }
+  ]
+}
+```
+- dnd-text
+```ts
+{
+  // m842881D
+  "canvas.m842881D1_export": "94196435",
+  "canvas.m842881D1_export:fails": {
+    "0256cbb0": { createdAt: 1546629145120 }
+  },
+  "canvas.m842881D2_export": "0256cbb0",
+  "canvas.m842881D2_export:successes": {
+    "0256cbb0": { createdAt: 1546629147047 }
+  },
+  "canvas.m842881D1_export:successes": {
+    "94196435": { createdAt: 1546629149246 }
+  },
+  "canvas.m842881D3_export": "908907fa",
+  "canvas.m842881D3_export:successes": {
+    "908907fa": { createdAt: 1546629151195 }
+  },
+  "canvas.m842881D4_export": "7e2d80b6",
+  "canvas.m842881D4_export:successes": {
+    "7e2d80b6": { createdAt: 1546629152962 }
+  }
+}
+```
+- dnd-image-set
+```ts
+{
+  // m851881DWIs
+  "canvas.m851881DWI3_export": "05778f99",
+  "canvas.m851881DWI3_export:fails":{
+    "09f828c6": { createdAt: 1546629325321 },
+    "2b9d4739": { createdAt: 1546629329037 }
+  },
+  "canvas.m851881DWI2_export": "2b9d4739",
+  "canvas.m851881DWI2_export:fails":{
+    "09f828c6": { createdAt: 1546629326475 }
+  },
+  "canvas.m851881DWI1_export": "09f828c6",
+  "canvas.m851881DWI1_export:successes":{
+    "09f828c6": { createdAt: 1546629327642 }
+  },
+  "canvas.m851881DWI2_export:successes":{
+    "2b9d4739": { createdAt: 1546629332673 }
+  },
+  "canvas.m851881DWI3_export:successes":{
+    "05778f99": { createdAt: 1546629334315 }
+  },
+  "canvas.m851881DWI4_export": "8da2df71",
+  "canvas.m851881DWI4_export:successes":{
+    "8da2df71": { createdAt: 1546629336074 }
+  },
+}
+```
+- dnd-image
+```ts
+{
+  // m856578WI
+  "canvas.m856578WI1_export": "e7ffeec7",
+  "canvas.m856578WI1_export:successes":
+    { "e7ffeec7": { createdAt: 1546629579604 }
+  },
+  "canvas.m856578WI3_export": "777db5d6",
+  "canvas.m856578WI3_export:fails":
+    { "811b0c14": { createdAt: 1546629581312 }
+  },
+  "canvas.m856578WI2_export": "811b0c14",
+  "canvas.m856578WI2_export:successes":
+    { "811b0c14": { createdAt: 1546629582656 }
+  },
+  "canvas.m856578WI4_export": "",
+  "canvas.m856578WI4_export:fails":
+    { "777db5d6": { createdAt: 1546629584152 }
+  },
+  "canvas.m856578WI3_export:successes":
+    { "777db5d6": { createdAt: 1546629585569 }
+  },
+  "canvas.m856578WI4_export": "ee4cd130",
+  "canvas.m856578WI4_export:successes":
+    { "ee4cd130": { createdAt: 1546629586977 }
+  }
+}
+```
+- order-word
+```ts
+{
+  // m859286OW
+  "canvas.m859286OW1_export": [ "drag36d8bc8a","drag9ba778a3","drag4f26ba1b","drag054bef01","dragb2836e03","drag1a3cdb57","drag1f2c7f2d","drag48d1d7a7" ],
+  "canvas.m859286OW1_export:fails": {
+    "drag36d8bc8a,drag054bef01,drag48d1d7a7,drag1f2c7f2d,drag4f26ba1b,drag9ba778a3,dragb2836e03,drag1a3cdb57": { createdAt: 1546629829708 },
+    "drag36d8bc8a,drag9ba778a3,drag1f2c7f2d,drag054bef01,drag48d1d7a7,drag4f26ba1b,dragb2836e03,drag1a3cdb57": { createdAt: 1546629837235 },
+    "drag36d8bc8a,drag9ba778a3,drag4f26ba1b,drag1f2c7f2d,drag054bef01,dragb2836e03,drag48d1d7a7,drag1a3cdb57": { createdAt: 1546629842221 }
+  },
+  "canvas.m859286OW1_export:successes": {
+    "drag36d8bc8a,drag48d1d7a7,drag054bef01,drag1f2c7f2d,drag4f26ba1b,drag9ba778a3,dragb2836e03,drag1a3cdb57": { createdAt: 1546629827848 },
+    "drag36d8bc8a,drag9ba778a3,drag054bef01,drag48d1d7a7,drag1f2c7f2d,drag4f26ba1b,dragb2836e03,drag1a3cdb57": { createdAt: 1546629831594 },
+    "drag36d8bc8a,drag9ba778a3,drag4f26ba1b,drag1f2c7f2d,drag054bef01,drag48d1d7a7,dragb2836e03,drag1a3cdb57": { createdAt: 1546629839805 },
+    "drag36d8bc8a,drag9ba778a3,drag4f26ba1b,drag054bef01,drag1f2c7f2d,dragb2836e03,drag1a3cdb57,drag48d1d7a7": { createdAt: 1546629855180 },
+    "drag36d8bc8a,drag9ba778a3,drag4f26ba1b,drag054bef01,dragb2836e03,drag1f2c7f2d,drag1a3cdb57,drag48d1d7a7": { createdAt: 1546629857032 },
+    "drag36d8bc8a,drag9ba778a3,drag4f26ba1b,drag054bef01,dragb2836e03,drag1a3cdb57,drag1f2c7f2d,drag48d1d7a7": { createdAt: 1546629859748 }
+  }
+}
+```
+- order-sentence
+```ts
+{
+  "canvas.m859318OS1_export": [ "drag418283ad","dragd8d38935","drag49f441a9","drag28b64115" ],
+  "canvas.m859318OS1_export:fails": {
+    "dragd8d38935,drag28b64115,drag418283ad,drag49f441a9": { createdAt: 1546630169693 }
+  },
+  "canvas.m859318OS1_export:successes": {
+    "drag418283ad,dragd8d38935,drag28b64115,drag49f441a9": { createdAt: 1546630172912 },
+    "drag418283ad,dragd8d38935,drag49f441a9,drag28b64115": { createdAt: 1546630174671 }
+  }
+}
+```
+
+</p>
+</details>
+
+
+#### Категории зависимостей блоков
 
 <details>
 <summary>развернуть</summary>
