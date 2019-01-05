@@ -12,7 +12,7 @@ export interface IBlockScoreStrategyConfig {
   blockScoreApi: BlockScoreApi;
   blockId: TBlockId;
   blockConfig: BlockConfig;
-  model?: BlockBaseModel<any>;
+  model?: BlockBaseModel<any, any>;
 }
 
 export interface IBlockScore {

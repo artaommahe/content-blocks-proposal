@@ -9,22 +9,22 @@ import { IBlockAnswer } from '../../model/interface';
 
 @Injectable({ providedIn: 'root' })
 export class BlockSyncApi {
-  public onRestore<T>(blockId: TBlockId): Observable<IBlockAnswer<T>[] | null> {
-    return blocksListenGlobalEvent<IBlockSyncRestore<T>>(BLOCK_SYNC_EVENTS.restore).pipe(
+  public onRestore<TValue>(blockId: TBlockId): Observable<IBlockAnswer<TValue>[] | null> {
+    return blocksListenGlobalEvent<IBlockSyncRestore<TValue>>(BLOCK_SYNC_EVENTS.restore).pipe(
       filter(event => (event.blockId === blockId)),
       map(({ data }) => data),
     );
   }
 
-  public onData<T>(blockId: TBlockId): Observable<T | null> {
-    return blocksListenGlobalEvent<IBlockSyncData<T>>(BLOCK_SYNC_EVENTS.data).pipe(
+  public onData<TValue>(blockId: TBlockId): Observable<TValue | null> {
+    return blocksListenGlobalEvent<IBlockSyncData<TValue>>(BLOCK_SYNC_EVENTS.data).pipe(
       filter(event => (event.blockId === blockId)),
       map(({ data }) => data),
     );
   }
 
-  public add<T>(blockId: TBlockId, data: IBlockAnswer<T>): void {
-    blocksDispatchGlobalEvent<IBlockSyncAdd<T>>(BLOCK_SYNC_EVENTS.add, {
+  public add<TValue>(blockId: TBlockId, data: IBlockAnswer<TValue>): void {
+    blocksDispatchGlobalEvent<IBlockSyncAdd<TValue>>(BLOCK_SYNC_EVENTS.add, {
       blockId,
       data,
     });

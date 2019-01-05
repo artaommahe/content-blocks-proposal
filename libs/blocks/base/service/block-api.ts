@@ -1,10 +1,11 @@
 import { BlockBaseSyncStrategy } from '../sync/strategy/base';
 import { BlockBaseScoreStrategy } from '../score/strategy/base';
+import { IBlockAnswer } from '../model/interface';
 
-export class BlockApi<T = void> {
+export class BlockApi<TValue = void, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>> {
   constructor(
     public score: BlockBaseScoreStrategy,
-    public sync: BlockBaseSyncStrategy<T>,
+    public sync: BlockBaseSyncStrategy<TValue, TAnswer>,
   ) {
   }
 

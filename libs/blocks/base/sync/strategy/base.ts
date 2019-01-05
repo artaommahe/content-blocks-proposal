@@ -8,9 +8,9 @@ import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destro
 import { BlockConfig } from '../../config/config';
 import { IBlockAnswer } from '../../model/interface';
 
-export class BlockBaseSyncStrategy<T> {
+export class BlockBaseSyncStrategy<TValue, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>> {
   private blockSyncApi: BlockSyncApi;
-  private model: BlockBaseModel<T> | undefined;
+  private model: BlockBaseModel<TValue, TAnswer> | undefined;
   private blockId: TBlockId;
   private blockConfig: BlockConfig;
 
@@ -18,7 +18,7 @@ export class BlockBaseSyncStrategy<T> {
   private valueFromSync = false;
 
   constructor(
-    config: IBlockSyncStrategyConfig<T>,
+    config: IBlockSyncStrategyConfig<TValue, TAnswer>,
   ) {
     this.blockSyncApi = config.blockSyncApi;
     this.model = config.model;
@@ -41,19 +41,19 @@ export class BlockBaseSyncStrategy<T> {
     //
   }
 
-  public onRestore(): Observable<IBlockAnswer<T>[]> {
-    return this.blockSyncApi.onRestore<T>(this.blockId).pipe(
-      filter((data): data is IBlockAnswer<T>[] => this.isEnabled() && !!data),
+  public onRestore(): Observable<TAnswer[]> {
+    return this.blockSyncApi.onRestore<TValue>(this.blockId).pipe(
+      filter((data): data is TAnswer[] => this.isEnabled() && !!data),
     );
   }
 
-  public onData(): Observable<T> {
-    return this.blockSyncApi.onData<T>(this.blockId).pipe(
-      filter((data): data is T => this.isEnabled() && !!data),
+  public onData(): Observable<TValue> {
+    return this.blockSyncApi.onData<TValue>(this.blockId).pipe(
+      filter((data): data is TValue => this.isEnabled() && !!data),
     );
   }
 
-  public add(data: IBlockAnswer<T>): void {
+  public add(data: TAnswer): void {
     if (!this.isEnabled()) {
       return;
     }
@@ -73,7 +73,7 @@ export class BlockBaseSyncStrategy<T> {
     return !!this.blockConfig.get([ 'sync', 'enabled' ]);
   }
 
-  private bindToModel(model: BlockBaseModel<T>): void {
+  private bindToModel(model: BlockBaseModel<TValue, TAnswer>): void {
     model.newAnswer$
       .pipe(
         filter(() => this.valueIsNotFromSync()),

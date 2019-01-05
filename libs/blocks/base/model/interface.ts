@@ -1,5 +1,5 @@
-export interface IBlockAnswer<T> {
-  value: T;
+export interface IBlockAnswer<TValue> {
+  value: TValue;
   createdAt: number;
   isCorrect: boolean | null;
 }

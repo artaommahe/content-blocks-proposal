@@ -3,15 +3,15 @@ import { map, skip, debounceTime, take, mapTo } from 'rxjs/operators';
 import { IBlockAnswer } from './interface';
 import { getStreamValue } from '@skyeng/libs/base/helpers';
 
-export class BlockBaseModel<T> {
-  private answers = new BehaviorSubject<IBlockAnswer<T>[]>([]);
-  private correctAnswers = new BehaviorSubject<T[]>([]);
-  private newAnswer = new Subject<IBlockAnswer<T>>();
+export class BlockBaseModel<TValue, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>> {
+  private answers = new BehaviorSubject<TAnswer[]>([]);
+  private correctAnswers = new BehaviorSubject<TValue[]>([]);
+  private newAnswer = new Subject<TAnswer>();
 
   public answers$ = this.answers.asObservable();
   public correctAnswers$ = this.correctAnswers.asObservable();
   public correctAnswersInited$: Observable<void>;
-  public currentAnswer$: Observable<IBlockAnswer<T> | undefined>;
+  public currentAnswer$: Observable<TAnswer | undefined>;
   public newAnswer$ = this.newAnswer.asObservable();
 
   constructor(
@@ -28,14 +28,14 @@ export class BlockBaseModel<T> {
     );
   }
 
-  public addCorrectAnswer(correctAnswer: T): void {
+  public addCorrectAnswer(correctAnswer: TValue): void {
     this.correctAnswers.next([
       ...this.correctAnswers.getValue(),
       correctAnswer,
     ]);
   }
 
-  public addAnswer(value: T): void {
+  public addAnswer(value: TValue): void {
     const currentValue = getStreamValue(this.currentAnswer$);
 
     if (currentValue && (value === currentValue.value)) {
@@ -52,19 +52,19 @@ export class BlockBaseModel<T> {
     this.newAnswer.next(answer);
   }
 
-  public setAnswers(answers: IBlockAnswer<T>[]): void {
+  public setAnswers(answers: TAnswer[]): void {
     this.answers.next(answers);
   }
 
-  private createAnswer(value: T): IBlockAnswer<T> {
-    return {
+  private createAnswer(value: TValue): TAnswer {
+    return <TAnswer> {
       value,
       createdAt: Date.now(),
       isCorrect: this.isCorrect(value),
     };
   }
 
-  private isCorrect(value: T): boolean {
+  private isCorrect(value: TValue): boolean {
     const correctAnswers = this.correctAnswers.getValue();
 
     return correctAnswers.includes(value);

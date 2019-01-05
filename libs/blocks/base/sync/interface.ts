@@ -8,28 +8,28 @@ export interface IBlockSyncConfig {
   enabled?: boolean;
 }
 
-export interface IBlockSyncStrategyConfig<T> {
+export interface IBlockSyncStrategyConfig<TValue, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>> {
   blockSyncApi: BlockSyncApi;
   blockId: TBlockId;
   blockConfig: BlockConfig;
-  model?: BlockBaseModel<T>;
+  model?: BlockBaseModel<TValue, TAnswer>;
 }
 
-export interface IBlockSyncData<T> {
+export interface IBlockSyncData<TValue> {
   blockId: TBlockId;
-  data: T | null;
+  data: TValue | null;
 }
 
-export interface IBlockSyncAdd<T> {
+export interface IBlockSyncAdd<TValue> {
   blockId: TBlockId;
-  data: IBlockAnswer<T>;
+  data: IBlockAnswer<TValue>;
 }
 
 export interface IBlockSyncRequestRestore {
   blockId: TBlockId;
 }
 
-export interface IBlockSyncRestore<T> {
+export interface IBlockSyncRestore<TValue> {
   blockId: TBlockId;
-  data: IBlockAnswer<T>[] | null;
+  data: IBlockAnswer<TValue>[] | null;
 }
