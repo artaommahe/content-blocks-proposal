@@ -5,11 +5,11 @@ import { filter, map } from 'rxjs/operators';
 import { BLOCK_SYNC_EVENTS } from '../const';
 import { IBlockSyncData, IBlockSyncRequestRestore, IBlockSyncAdd, IBlockSyncRestore } from '../interface';
 import { Injectable } from '@angular/core';
-import { IAnswer } from '../../model/interface';
+import { IBlockAnswer } from '../../model/interface';
 
 @Injectable({ providedIn: 'root' })
 export class BlockSyncApi {
-  public onRestore<T>(blockId: TBlockId): Observable<IAnswer<T>[] | null> {
+  public onRestore<T>(blockId: TBlockId): Observable<IBlockAnswer<T>[] | null> {
     return blocksListenGlobalEvent<IBlockSyncRestore<T>>(BLOCK_SYNC_EVENTS.restore).pipe(
       filter(event => (event.blockId === blockId)),
       map(({ data }) => data),
@@ -23,7 +23,7 @@ export class BlockSyncApi {
     );
   }
 
-  public add<T>(blockId: TBlockId, data: IAnswer<T>): void {
+  public add<T>(blockId: TBlockId, data: IBlockAnswer<T>): void {
     blocksDispatchGlobalEvent<IBlockSyncAdd<T>>(BLOCK_SYNC_EVENTS.add, {
       blockId,
       data,

@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { TInputData } from '../../interface';
-import { IAnswer } from '@skyeng/libs/blocks/base/model/interface';
+import { IBlockAnswer } from '@skyeng/libs/blocks/base/model/interface';
 
 @Component({
   selector: 'sky-input-view',
@@ -10,7 +10,7 @@ import { IAnswer } from '@skyeng/libs/blocks/base/model/interface';
 })
 export class InputViewComponent {
   @Input() correctAnswers: string[];
-  @Input() currentAnswer: IAnswer<TInputData> | undefined;
+  @Input() currentAnswer: IBlockAnswer<TInputData> | undefined;
 
   @Output() valueChange = new EventEmitter<TInputData>();
 

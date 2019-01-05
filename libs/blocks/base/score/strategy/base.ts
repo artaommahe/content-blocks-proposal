@@ -6,7 +6,7 @@ import { BlockScoreApi } from '../service/score-api';
 import { TBlockId } from '../../interface';
 import { BlockBaseModel } from '../../model/base';
 import { BlockConfig } from '../../config/config';
-import { IAnswer } from '../../model/interface';
+import { IBlockAnswer } from '../../model/interface';
 
 export class BlockBaseScoreStrategy {
   private blockScoreApi: BlockScoreApi;
@@ -60,7 +60,7 @@ export class BlockBaseScoreStrategy {
     const startingScore = this.getStartingScore();
 
     const answer$ = model.answers$.pipe(
-      startWith<IAnswer<any>[]>([]),
+      startWith<IBlockAnswer<any>[]>([]),
       pairwise(),
       map(([ prev, next ]) => next.filter(answer => !prev.includes(answer))),
       concatAll(),

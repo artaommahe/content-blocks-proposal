@@ -2,7 +2,7 @@ import { TBlockId } from '../interface';
 import { BlockSyncApi } from './service/sync-api';
 import { BlockBaseModel } from '../model/base';
 import { BlockConfig } from '../config/config';
-import { IAnswer } from '../model/interface';
+import { IBlockAnswer } from '../model/interface';
 
 export interface IBlockSyncConfig {
   enabled?: boolean;
@@ -22,7 +22,7 @@ export interface IBlockSyncData<T> {
 
 export interface IBlockSyncAdd<T> {
   blockId: TBlockId;
-  data: IAnswer<T>;
+  data: IBlockAnswer<T>;
 }
 
 export interface IBlockSyncRequestRestore {
@@ -31,5 +31,5 @@ export interface IBlockSyncRequestRestore {
 
 export interface IBlockSyncRestore<T> {
   blockId: TBlockId;
-  data: IAnswer<T>[] | null;
+  data: IBlockAnswer<T>[] | null;
 }

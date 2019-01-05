@@ -6,7 +6,7 @@ import { BlockSyncApi } from '../service/sync-api';
 import { BlockBaseModel } from '../../model/base';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { BlockConfig } from '../../config/config';
-import { IAnswer } from '../../model/interface';
+import { IBlockAnswer } from '../../model/interface';
 
 export class BlockBaseSyncStrategy<T> {
   private blockSyncApi: BlockSyncApi;
@@ -41,9 +41,9 @@ export class BlockBaseSyncStrategy<T> {
     //
   }
 
-  public onRestore(): Observable<IAnswer<T>[]> {
+  public onRestore(): Observable<IBlockAnswer<T>[]> {
     return this.blockSyncApi.onRestore<T>(this.blockId).pipe(
-      filter((data): data is IAnswer<T>[] => this.isEnabled() && !!data),
+      filter((data): data is IBlockAnswer<T>[] => this.isEnabled() && !!data),
     );
   }
 
@@ -53,7 +53,7 @@ export class BlockBaseSyncStrategy<T> {
     );
   }
 
-  public add(data: IAnswer<T>): void {
+  public add(data: IBlockAnswer<T>): void {
     if (!this.isEnabled()) {
       return;
     }

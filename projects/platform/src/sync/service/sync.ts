@@ -7,7 +7,7 @@ import { ISyncData } from '../interface';
 import { shareReplay, delayWhen, map } from 'rxjs/operators';
 import { TBlockId } from '@skyeng/libs/blocks/base/interface';
 import { IBlockSyncRequestRestore, IBlockSyncAdd, IBlockSyncRestore } from '@skyeng/libs/blocks/base/sync/interface';
-import { IAnswer } from '@skyeng/libs/blocks/base/model/interface';
+import { IBlockAnswer } from '@skyeng/libs/blocks/base/model/interface';
 
 @Injectable({ providedIn: 'root' })
 export class SyncService {
@@ -41,11 +41,11 @@ export class SyncService {
       .subscribe(({ blockId, data }) => this.add(blockId, data));
   }
 
-  private getBlockData(blockId: TBlockId): IAnswer<any>[] | null {
+  private getBlockData(blockId: TBlockId): IBlockAnswer<any>[] | null {
     return this.data[blockId] || null;
   }
 
-  private add(blockId: TBlockId, blockData: IAnswer<any>): void {
+  private add(blockId: TBlockId, blockData: IBlockAnswer<any>): void {
     this.data = {
       ...this.data,
       [ blockId ]: [
