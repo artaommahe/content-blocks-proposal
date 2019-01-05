@@ -1,11 +1,12 @@
 import { MAX_SCORE_DEFAULT } from '../const';
 import { IBlockScore, IBlockScoreStrategyConfig } from '../interface';
-import { filter, withLatestFrom, scan } from 'rxjs/operators';
+import { filter, withLatestFrom, scan, map, pairwise, startWith, concatAll, debounceTime } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { BlockScoreApi } from '../service/score-api';
 import { TBlockId } from '../../interface';
 import { BlockBaseModel } from '../../model/base';
 import { BlockConfig } from '../../config/config';
+import { IAnswer } from '../../model/interface';
 
 export class BlockBaseScoreStrategy {
   private blockScoreApi: BlockScoreApi;
@@ -58,8 +59,16 @@ export class BlockBaseScoreStrategy {
   private bindToModel(model: BlockBaseModel<any>): void {
     const startingScore = this.getStartingScore();
 
-    model.isCorrect$
+    const answer$ = model.answers$.pipe(
+      startWith<IAnswer<any>[]>([]),
+      pairwise(),
+      map(([ prev, next ]) => next.filter(answer => !prev.includes(answer))),
+      concatAll(),
+    );
+
+    answer$
       .pipe(
+        map(answer => answer ? answer.isCorrect : null),
         filter((isCorrect): isCorrect is boolean => isCorrect !== null),
         withLatestFrom(model.correctAnswers$),
         // TODO: distinctUntiChanged, dont send same score when maxScore is reached
@@ -67,6 +76,7 @@ export class BlockBaseScoreStrategy {
           (score, [ isCorrect, correctAnswers ]) => this.handleScore(score, isCorrect, correctAnswers),
           startingScore
         ),
+        debounceTime(0),
         takeUntilDestroyed(this, this.destroyedOptions),
       )
       .subscribe(score => this.set(score));

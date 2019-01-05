@@ -1,11 +1,12 @@
 import { TBlockId } from '../../interface';
-import { Observable, merge } from 'rxjs';
-import { filter, skip } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { IBlockSyncStrategyConfig } from '../interface';
 import { BlockSyncApi } from '../service/sync-api';
 import { BlockBaseModel } from '../../model/base';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { BlockConfig } from '../../config/config';
+import { IAnswer } from '../../model/interface';
 
 export class BlockBaseSyncStrategy<T> {
   private blockSyncApi: BlockSyncApi;
@@ -40,9 +41,9 @@ export class BlockBaseSyncStrategy<T> {
     //
   }
 
-  public onRestored(): Observable<T> {
-    return this.blockSyncApi.onRestored<T>(this.blockId).pipe(
-      filter((data): data is T => this.isEnabled() && !!data),
+  public onRestore(): Observable<IAnswer<T>[]> {
+    return this.blockSyncApi.onRestore<T>(this.blockId).pipe(
+      filter((data): data is IAnswer<T>[] => this.isEnabled() && !!data),
     );
   }
 
@@ -52,12 +53,12 @@ export class BlockBaseSyncStrategy<T> {
     );
   }
 
-  public send(data: T): void {
+  public add(data: IAnswer<T>): void {
     if (!this.isEnabled()) {
       return;
     }
 
-    this.blockSyncApi.send(this.blockId, data);
+    this.blockSyncApi.add(this.blockId, data);
   }
 
   public requestRestore(): void {
@@ -73,26 +74,28 @@ export class BlockBaseSyncStrategy<T> {
   }
 
   private bindToModel(model: BlockBaseModel<T>): void {
-    // sync new value
-    model.value$
+    model.newAnswer$
       .pipe(
-        skip(1),
         filter(() => this.valueIsNotFromSync()),
         takeUntilDestroyed(this, this.destroyedOptions),
       )
-      .subscribe((value: T) => this.send(value));
+      .subscribe(answer => this.add(answer));
 
-    // set value from sync
-    merge(
-        this.onRestored(),
-        this.onData(),
+    // restoring answers
+    this.onRestore()
+      .pipe(
+        takeUntilDestroyed(this, this.destroyedOptions),
       )
+      .subscribe(data => model.setAnswers(data));
+
+    // new value from sync
+    this.onData()
       .pipe(
         takeUntilDestroyed(this, this.destroyedOptions),
       )
       .subscribe(value => {
         this.valueFromSync = true;
-        model.setValue(value);
+        model.addAnswer(value);
       });
   }
 

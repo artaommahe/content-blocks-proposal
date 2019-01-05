@@ -6,7 +6,8 @@ import { BLOCK_SYNC_EVENTS } from '@skyeng/libs/blocks/base/sync/const';
 import { ISyncData } from '../interface';
 import { shareReplay, delayWhen, map } from 'rxjs/operators';
 import { TBlockId } from '@skyeng/libs/blocks/base/interface';
-import { IBlockSyncRequestRestore, IBlockSyncData, IBlockSendData } from '@skyeng/libs/blocks/base/sync/interface';
+import { IBlockSyncRequestRestore, IBlockSyncAdd, IBlockSyncRestore } from '@skyeng/libs/blocks/base/sync/interface';
+import { IAnswer } from '@skyeng/libs/blocks/base/model/interface';
 
 @Injectable({ providedIn: 'root' })
 export class SyncService {
@@ -33,21 +34,24 @@ export class SyncService {
         }))
       )
       .subscribe(eventData =>
-        blocksDispatchGlobalEvent<IBlockSyncData<any>>(BLOCK_SYNC_EVENTS.restored, eventData)
+        blocksDispatchGlobalEvent<IBlockSyncRestore<any>>(BLOCK_SYNC_EVENTS.restore, eventData)
       );
 
-    blocksListenGlobalEvent<IBlockSendData<any>>(BLOCK_SYNC_EVENTS.send)
-      .subscribe(({ blockId, data }) => this.set(blockId, data));
+    blocksListenGlobalEvent<IBlockSyncAdd<any>>(BLOCK_SYNC_EVENTS.add)
+      .subscribe(({ blockId, data }) => this.add(blockId, data));
   }
 
-  private getBlockData(blockId: TBlockId): any | null {
+  private getBlockData(blockId: TBlockId): IAnswer<any>[] | null {
     return this.data[blockId] || null;
   }
 
-  private set(blockId: TBlockId, blockData: any): void {
+  private add(blockId: TBlockId, blockData: IAnswer<any>): void {
     this.data = {
       ...this.data,
-      [ blockId ]: blockData,
+      [ blockId ]: [
+        ...(this.data[blockId] || []),
+        blockData,
+      ],
     };
 
     this.syncApiService.store(this.data);

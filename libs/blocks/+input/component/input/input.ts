@@ -12,9 +12,8 @@ import { getBlockConfig } from '@skyeng/libs/blocks/base/helpers';
     <ng-content></ng-content>
 
     <sky-input-view [correctAnswers]="model.correctAnswers$ | async"
-                    [isCorrect]="model.isCorrect$ | async"
-                    [value]="model.value$ | async"
-                    (valueChange)="setValue($event)">
+                    [currentAnswer]="model.currentAnswer$ | async"
+                    (valueChange)="addAnswer($event)">
     </sky-input-view>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,10 +32,10 @@ export class InputComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit() {
-    this.model = new BlockBaseModel<TInputData>('');
+    this.model = new BlockBaseModel<TInputData>();
 
-    // wait for answers to init
-    this.model.answersInited$
+    // wait for correct answers to init
+    this.model.correctAnswersInited$
       .pipe(
         takeUntilDestroyed(this),
       )
@@ -53,8 +52,8 @@ export class InputComponent implements OnInit, OnDestroy {
     this.model.addCorrectAnswer(correctAnswer);
   }
 
-  public setValue(value: TInputData): void {
-    this.model.setValue(value);
+  public addAnswer(value: TInputData): void {
+    this.model.addAnswer(value);
   }
 
   private init() {

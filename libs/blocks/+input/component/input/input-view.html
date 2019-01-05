@@ -1,10 +1,10 @@
 <div class="root"
-     [class.-correct]="isCorrect === true"
-     [class.-wrong]="isCorrect === false">
-  <ng-container *ngIf="!isCorrect">
+     [class.-correct]="currentAnswer?.isCorrect === true"
+     [class.-wrong]="currentAnswer?.isCorrect === false">
+  <ng-container *ngIf="currentAnswer?.isCorrect !== true">
     <div class="input-container">
       <input class="input"
-             [value]="value"
+             [value]="currentAnswer?.value"
              (keydown)="onKeyDown($event)"
              #input>
 
@@ -18,8 +18,8 @@
     </div>
   </ng-container>
 
-  <div *ngIf="isCorrect"
+  <div *ngIf="currentAnswer?.isCorrect === true"
        class="correct-answer">
-    {{ value }}
+    {{ currentAnswer.value }}
   </div>
 </div>

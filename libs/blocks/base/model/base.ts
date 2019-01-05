@@ -1,29 +1,26 @@
-import { BehaviorSubject, Observable } from 'rxjs';
-import { withLatestFrom, map, skip, debounceTime, take, mapTo } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { map, skip, debounceTime, take, mapTo } from 'rxjs/operators';
+import { IAnswer } from './interface';
+import { getStreamValue } from '@skyeng/libs/base/helpers';
 
 export class BlockBaseModel<T> {
+  private answers = new BehaviorSubject<IAnswer<T>[]>([]);
   private correctAnswers = new BehaviorSubject<T[]>([]);
-  private value: BehaviorSubject<T>;
+  private newAnswer = new Subject<IAnswer<T>>();
 
-  public answersInited$: Observable<void>;
+  public answers$ = this.answers.asObservable();
   public correctAnswers$ = this.correctAnswers.asObservable();
-  public isCorrect$: Observable<boolean | null>;
-  public value$: Observable<T>;
+  public correctAnswersInited$: Observable<void>;
+  public currentAnswer$: Observable<IAnswer<T> | undefined>;
+  public newAnswer$ = this.newAnswer.asObservable();
 
   constructor(
-    initialValue: T,
   ) {
-    this.value = new BehaviorSubject<T>(initialValue);
-    this.value$ = this.value.asObservable();
-
-    this.isCorrect$ = this.value$.pipe(
-      withLatestFrom(this.correctAnswers),
-      map(([ value, correctAnswers ]) =>
-        value ? correctAnswers.includes(value) : null
-      ),
+    this.currentAnswer$ = this.answers.asObservable().pipe(
+      map(answers => answers[answers.length - 1]),
     );
 
-    this.answersInited$ = this.correctAnswers$.pipe(
+    this.correctAnswersInited$ = this.correctAnswers$.pipe(
       skip(1),
       debounceTime(0),
       take(1),
@@ -38,11 +35,38 @@ export class BlockBaseModel<T> {
     ]);
   }
 
-  public setValue(value: T): void {
-    if (value === this.value.getValue()) {
+  public addAnswer(value: T): void {
+    const currentValue = getStreamValue(this.currentAnswer$);
+
+    if (currentValue && (value === currentValue.value)) {
       return;
     }
 
-    this.value.next(value);
+    const answer = this.createAnswer(value);
+
+    this.answers.next([
+      ...this.answers.getValue(),
+      answer,
+    ]);
+
+    this.newAnswer.next(answer);
+  }
+
+  public setAnswers(answers: IAnswer<T>[]): void {
+    this.answers.next(answers);
+  }
+
+  private createAnswer(value: T): IAnswer<T> {
+    return {
+      value,
+      createdAt: Date.now(),
+      isCorrect: this.isCorrect(value),
+    };
+  }
+
+  private isCorrect(value: T): boolean {
+    const correctAnswers = this.correctAnswers.getValue();
+
+    return correctAnswers.includes(value);
   }
 }
