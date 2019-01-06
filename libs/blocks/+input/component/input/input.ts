@@ -57,7 +57,7 @@ export class InputComponent implements OnInit, OnDestroy {
   }
 
   public addAnswer(value: TInputData, isKeyUsed = false): void {
-    this.model.addAnswer(value, { isKeyUsed });
+    this.model.addAnswer({ value, isKeyUsed });
   }
 
   public useKey(): void {

@@ -39,14 +39,14 @@ export class BlockBaseModel<
     ]);
   }
 
-  public addAnswer(value: TValue, data?: TAnswerData): void {
+  public addAnswer(answerPart: Partial<TAnswer> & TAnswerData): void {
     const currentValue = getStreamValue(this.currentAnswer$);
 
-    if (currentValue && (value === currentValue.value)) {
+    if (currentValue && (answerPart.value === currentValue.value)) {
       return;
     }
 
-    const answer = this.createAnswer(value, data);
+    const answer = this.createAnswer(answerPart);
 
     this.answers.next([
       ...this.answers.getValue(),
@@ -60,19 +60,22 @@ export class BlockBaseModel<
     this.answers.next(answers);
   }
 
-  private createAnswer(value: TValue, data?: TAnswerData): TAnswer {
+  public getCorrectAnswers(): TValue[] {
+    return this.correctAnswers.getValue();
+  }
+
+  private createAnswer(answer: Partial<TAnswer> & TAnswerData): TAnswer {
     return <TAnswer> {
-      value,
       createdAt: Date.now(),
-      isCorrect: this.isCorrect(value),
+      isCorrect: this.isCorrect(answer.value),
       // https://github.com/Microsoft/TypeScript/issues/10727
-      ...((<Object> data) || {})
+      ...((<Object> answer) || {})
     };
   }
 
-  private isCorrect(value: TValue): boolean {
-    const correctAnswers = this.correctAnswers.getValue();
+  private isCorrect(value?: TValue): boolean {
+    const correctAnswers = this.getCorrectAnswers();
 
-    return correctAnswers.includes(value);
+    return !!value && correctAnswers.includes(value);
   }
 }

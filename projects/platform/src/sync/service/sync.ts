@@ -6,15 +6,16 @@ import { BLOCK_SYNC_EVENTS } from '@skyeng/libs/blocks/base/sync/const';
 import { ISyncData } from '../interface';
 import { shareReplay, delayWhen, map } from 'rxjs/operators';
 import { TBlockId } from '@skyeng/libs/blocks/base/interface';
-import { IBlockSyncRequestRestore, IBlockSyncAdd, IBlockSyncRestore } from '@skyeng/libs/blocks/base/sync/interface';
+import { IBlockSyncRequestRestore, IBlockSyncAdd, IBlockSyncRestore, IBlockSyncData } from '@skyeng/libs/blocks/base/sync/interface';
 import { IBlockAnswer } from '@skyeng/libs/blocks/base/model/interface';
+import { SYNC_EVENS } from '../const';
 
 @Injectable({ providedIn: 'root' })
 export class SyncService {
   private data: ISyncData;
 
   constructor(
-    _rtmService: RtmService,
+    private rtmService: RtmService,
     private syncApiService: SyncApiService,
   ) {
     const dataLoaded$ = this.syncApiService.load().pipe(
@@ -38,7 +39,16 @@ export class SyncService {
       );
 
     blocksListenGlobalEvent<IBlockSyncAdd<any>>(BLOCK_SYNC_EVENTS.add)
-      .subscribe(({ blockId, data }) => this.add(blockId, data));
+      .subscribe(({ blockId, data }) => {
+        this.add(blockId, data);
+
+        this.rtmService.send<IBlockSyncAdd<any>>(SYNC_EVENS.add, { blockId, data });
+      });
+
+    this.rtmService.on<IBlockSyncAdd<any>>(SYNC_EVENS.add)
+      .subscribe(data =>
+        blocksDispatchGlobalEvent<IBlockSyncData<any>>(BLOCK_SYNC_EVENTS.data, data)
+      );
   }
 
   private getBlockData(blockId: TBlockId): IBlockAnswer<any>[] | null {

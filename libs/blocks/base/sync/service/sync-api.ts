@@ -16,8 +16,8 @@ export class BlockSyncApi {
     );
   }
 
-  public onData<TValue>(blockId: TBlockId): Observable<TValue | null> {
-    return blocksListenGlobalEvent<IBlockSyncData<TValue>>(BLOCK_SYNC_EVENTS.data).pipe(
+  public onData<TAnswer>(blockId: TBlockId): Observable<TAnswer | null> {
+    return blocksListenGlobalEvent<IBlockSyncData<TAnswer>>(BLOCK_SYNC_EVENTS.data).pipe(
       filter(event => (event.blockId === blockId)),
       map(({ data }) => data),
     );

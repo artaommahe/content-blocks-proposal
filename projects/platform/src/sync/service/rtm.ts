@@ -1,18 +1,23 @@
 import { Injectable } from '@angular/core';
 import { Observable, fromEvent } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
+import { IRtmEvent } from '../interface';
 
 @Injectable({ providedIn: 'root' })
 export class RtmService {
   private broadcastChannel = new BroadcastChannel('blocks');
 
-  public on<T>(): Observable<T> {
+  public on<T>(event: string): Observable<T> {
     return fromEvent<MessageEvent>(this.broadcastChannel, 'message').pipe(
-      map(event => event.data)
+      map(messageEvent => <IRtmEvent<T>> messageEvent.data),
+      filter(rtmEvent => rtmEvent.event === event),
+      map(({ data }) => data),
     );
   }
 
-  public send<T>(data: T): void {
-    this.broadcastChannel.postMessage(data);
+  public send<T>(event: string, data: T): void {
+    const rtmEvent: IRtmEvent<T> = { event, data };
+
+    this.broadcastChannel.postMessage(rtmEvent);
   }
 }

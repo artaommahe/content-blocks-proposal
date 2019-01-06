@@ -7,7 +7,6 @@ import { TBlockId } from '../../interface';
 import { BlockBaseModel } from '../../model/base';
 import { BlockConfig } from '../../config/config';
 import { IBlockAnswer } from '../../model/interface';
-import { getStreamValue } from '@skyeng/libs/base/helpers';
 
 export class BlockBaseScoreStrategy {
   private blockScoreApi: BlockScoreApi;
@@ -137,7 +136,7 @@ export class BlockBaseScoreStrategy {
       return;
     }
 
-    const correctAnswers = getStreamValue(this.model!.correctAnswers$);
+    const correctAnswers = this.model!.getCorrectAnswers();
 
     return {
       ...score,

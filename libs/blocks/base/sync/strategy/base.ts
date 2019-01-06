@@ -47,9 +47,9 @@ export class BlockBaseSyncStrategy<TValue, TAnswer extends IBlockAnswer<TValue> 
     );
   }
 
-  public onData(): Observable<TValue> {
-    return this.blockSyncApi.onData<TValue>(this.blockId).pipe(
-      filter((data): data is TValue => this.isEnabled() && !!data),
+  public onData(): Observable<TAnswer> {
+    return this.blockSyncApi.onData<TAnswer>(this.blockId).pipe(
+      filter((data): data is TAnswer => this.isEnabled() && !!data),
     );
   }
 
@@ -93,9 +93,9 @@ export class BlockBaseSyncStrategy<TValue, TAnswer extends IBlockAnswer<TValue> 
       .pipe(
         takeUntilDestroyed(this, this.destroyedOptions),
       )
-      .subscribe(value => {
+      .subscribe(answer => {
         this.valueFromSync = true;
-        model.addAnswer(value);
+        model.addAnswer(answer);
       });
   }
 
