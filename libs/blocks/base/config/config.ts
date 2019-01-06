@@ -49,9 +49,13 @@ export class BlockConfig<T = Required<IBlockConfig>> {
     );
   }
 
-  public set(config: Partial<T>): void {
+  public merge(config: Partial<T>): void {
     const newConfig = deepmerge(this.config.getValue(), config, { clone: false });
 
     this.config.next(newConfig);
+  }
+
+  public set(config: T): void {
+    this.config.next(config);
   }
 }
