@@ -49,7 +49,7 @@ export class BlockBaseSyncStrategy<TValue, TAnswer extends IBlockAnswer<TValue> 
 
   public onData(): Observable<TAnswer> {
     return this.blockSyncApi.onData<TAnswer>(this.blockId).pipe(
-      filter((data): data is TAnswer => this.isEnabled() && !!data),
+      filter(() => this.isEnabled()),
     );
   }
 
@@ -67,6 +67,20 @@ export class BlockBaseSyncStrategy<TValue, TAnswer extends IBlockAnswer<TValue> 
     }
 
     this.blockSyncApi.requestRestore(this.blockId);
+  }
+
+  public sendEvent<T = void>(event: string, data: T): void {
+    if (!this.isEnabled()) {
+      return;
+    }
+
+    this.blockSyncApi.sendEvent(this.blockId, { event, data });
+  }
+
+  public onEvent<T = void>(event: string): Observable<T> {
+    return this.blockSyncApi.onEvent<T>(this.blockId, event).pipe(
+      filter(() => this.isEnabled()),
+    );
   }
 
   private isEnabled(): boolean {

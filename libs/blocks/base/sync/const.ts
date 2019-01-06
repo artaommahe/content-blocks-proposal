@@ -3,4 +3,6 @@ export enum BLOCK_SYNC_EVENTS {
   restore = 'syncRestore',
   requestRestore = 'syncRequestRestore',
   data = 'syncData',
+  sendEvent = 'syncSendEvent',
+  event = 'syncEvent',
 }

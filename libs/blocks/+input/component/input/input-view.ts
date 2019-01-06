@@ -1,5 +1,10 @@
-import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import {
+  Component, ChangeDetectionStrategy, Input, Output, EventEmitter,
+  ViewChild, ElementRef, AfterViewInit, NgZone, OnDestroy,
+} from '@angular/core';
 import { TInputData, TInputAnswer } from '../../interface';
+import { fromEvent } from 'rxjs';
+import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 
 const KEY_AVAILABLE_ANSWERS_COUNT = 3;
 
@@ -9,15 +14,35 @@ const KEY_AVAILABLE_ANSWERS_COUNT = 3;
   styleUrls: [ 'input-view.scss' ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InputViewComponent {
+export class InputViewComponent implements AfterViewInit, OnDestroy {
   @Input() answers: TInputAnswer[];
   @Input() correctAnswers: string[];
   @Input() currentAnswer: TInputAnswer | undefined;
+  @Input() value: TInputAnswer;
 
+  @Output() typing = new EventEmitter<string>();
   @Output() useKey = new EventEmitter<void>();
   @Output() valueChange = new EventEmitter<TInputData>();
 
   @ViewChild('input') inputRef: ElementRef<HTMLInputElement>;
+
+  constructor(
+    private ngZone: NgZone,
+  ) {
+  }
+
+  public ngAfterViewInit() {
+    this.ngZone.runOutsideAngular(() => {
+      fromEvent(this.inputRef.nativeElement, 'input')
+        .pipe(
+          takeUntilDestroyed(this),
+        )
+        .subscribe(() => this.typing.next(this.inputRef.nativeElement.value));
+    });
+  }
+
+  public ngOnDestroy() {
+  }
 
   public canUseKey(): boolean {
     return !this.isCorrect() && (this.answers.length >= KEY_AVAILABLE_ANSWERS_COUNT);

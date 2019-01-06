@@ -17,7 +17,7 @@ export interface IBlockSyncStrategyConfig<TValue, TAnswer extends IBlockAnswer<T
 
 export interface IBlockSyncData<TValue> {
   blockId: TBlockId;
-  data: TValue | null;
+  data: TValue;
 }
 
 export interface IBlockSyncAdd<TValue> {
@@ -32,4 +32,14 @@ export interface IBlockSyncRequestRestore {
 export interface IBlockSyncRestore<TValue> {
   blockId: TBlockId;
   data: IBlockAnswer<TValue>[] | null;
+}
+
+export interface IBlockSyncEventData<T> {
+  event: string;
+  data: T;
+}
+
+export interface IBlockSyncEvent<T> {
+  blockId: TBlockId;
+  eventData: IBlockSyncEventData<T>;
 }

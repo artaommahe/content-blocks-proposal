@@ -4,7 +4,7 @@
   <ng-container *ngIf="!isCorrect()">
     <div class="input-container">
       <input class="input"
-             [value]="currentAnswer?.value"
+             [value]="value"
              (keydown)="onKeyDown($event)"
              #input>
 
@@ -25,6 +25,6 @@
 
   <div *ngIf="isCorrect()"
        class="correct-answer">
-    {{ currentAnswer.value }}
+    {{ value }}
   </div>
 </div>

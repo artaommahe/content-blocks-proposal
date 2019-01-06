@@ -7,6 +7,12 @@ import { getBlockConfig } from '@skyeng/libs/blocks/base/helpers';
 import { getStreamValue } from '@skyeng/libs/base/helpers';
 import { InputModel } from '../../exercise/model';
 import { handleKeyUsedScore } from '@skyeng/libs/blocks/base/score/handlers/key';
+import { BehaviorSubject } from 'rxjs';
+import { filter } from 'rxjs/operators';
+
+enum INPUT_EVENTS {
+  typing = 'typing',
+}
 
 @Component({
   selector: 'sky-input',
@@ -16,6 +22,8 @@ import { handleKeyUsedScore } from '@skyeng/libs/blocks/base/score/handlers/key'
     <sky-input-view [answers]="model.answers$ | async"
                     [correctAnswers]="model.correctAnswers$ | async"
                     [currentAnswer]="model.currentAnswer$ | async"
+                    [value]="value$ | async"
+                    (typing)="typing($event)"
                     (useKey)="useKey()"
                     (valueChange)="addAnswer($event)">
     </sky-input-view>
@@ -25,9 +33,11 @@ import { handleKeyUsedScore } from '@skyeng/libs/blocks/base/score/handlers/key'
 export class InputComponent implements OnInit, OnDestroy {
   @Input() id: string;
 
-  public model: InputModel;
-
   private blockApi: BlockApi<TInputData, TInputAnswer>;
+  private value = new BehaviorSubject<string>('');
+
+  public model: InputModel;
+  public value$ = this.value.asObservable();
 
   constructor(
     private blockService: BlockService,
@@ -44,6 +54,13 @@ export class InputComponent implements OnInit, OnDestroy {
         takeUntilDestroyed(this),
       )
       .subscribe(() => this.init());
+
+    this.model.currentAnswer$
+      .pipe(
+        filter((currentAnswer): currentAnswer is TInputAnswer => !!currentAnswer),
+        takeUntilDestroyed(this),
+      )
+      .subscribe(currentAnswer => this.value.next(currentAnswer.value));
   }
 
   public ngOnDestroy() {
@@ -70,6 +87,10 @@ export class InputComponent implements OnInit, OnDestroy {
     this.addAnswer(correctAnswers[0], true);
   }
 
+  public typing(value: string): void {
+    this.blockApi.sync.sendEvent(INPUT_EVENTS.typing, value);
+  }
+
   private init() {
     const blockConfig = getBlockConfig(this.elementRef.nativeElement);
 
@@ -83,5 +104,11 @@ export class InputComponent implements OnInit, OnDestroy {
         ]
       }
     });
+
+    this.blockApi.sync.onEvent<string>(INPUT_EVENTS.typing)
+      .pipe(
+        takeUntilDestroyed(this),
+      )
+      .subscribe(this.value);
   }
 }

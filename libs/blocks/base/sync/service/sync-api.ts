@@ -3,7 +3,10 @@ import { Observable } from 'rxjs';
 import { blocksListenGlobalEvent, blocksDispatchGlobalEvent } from '../../helpers';
 import { filter, map } from 'rxjs/operators';
 import { BLOCK_SYNC_EVENTS } from '../const';
-import { IBlockSyncData, IBlockSyncRequestRestore, IBlockSyncAdd, IBlockSyncRestore } from '../interface';
+import {
+  IBlockSyncData, IBlockSyncRequestRestore, IBlockSyncAdd,
+  IBlockSyncRestore, IBlockSyncEventData, IBlockSyncEvent,
+} from '../interface';
 import { Injectable } from '@angular/core';
 import { IBlockAnswer } from '../../model/interface';
 
@@ -16,7 +19,7 @@ export class BlockSyncApi {
     );
   }
 
-  public onData<TAnswer>(blockId: TBlockId): Observable<TAnswer | null> {
+  public onData<TAnswer>(blockId: TBlockId): Observable<TAnswer> {
     return blocksListenGlobalEvent<IBlockSyncData<TAnswer>>(BLOCK_SYNC_EVENTS.data).pipe(
       filter(event => (event.blockId === blockId)),
       map(({ data }) => data),
@@ -34,5 +37,19 @@ export class BlockSyncApi {
     blocksDispatchGlobalEvent<IBlockSyncRequestRestore>(BLOCK_SYNC_EVENTS.requestRestore, {
       blockId,
     });
+  }
+
+  public sendEvent<T>(blockId: TBlockId, eventData: IBlockSyncEventData<T>): void {
+    blocksDispatchGlobalEvent<IBlockSyncEvent<T>>(BLOCK_SYNC_EVENTS.sendEvent, {
+      blockId,
+      eventData,
+    });
+  }
+
+  public onEvent<T = void>(blockId: TBlockId, eventName: string): Observable<T> {
+    return blocksListenGlobalEvent<IBlockSyncEvent<T>>(BLOCK_SYNC_EVENTS.event).pipe(
+      filter(event => (event.blockId === blockId) && (event.eventData.event === eventName)),
+      map(({ eventData }) => eventData.data),
+    );
   }
 }
