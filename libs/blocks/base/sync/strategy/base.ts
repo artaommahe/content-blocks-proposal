@@ -34,39 +34,39 @@ export class BlockBaseSyncStrategy<TValue, TAnswer extends IBlockAnswer<TValue> 
     }
 
     // request initial value
-    this.requestRestore();
+    this.requestRestoreAnswers();
   }
 
   public destroy(): void {
     //
   }
 
-  public onRestore(): Observable<TAnswer[]> {
-    return this.blockSyncApi.onRestore<TValue>(this.blockId).pipe(
-      filter((data): data is TAnswer[] => this.isEnabled() && !!data),
+  public onRestoreAnswers(): Observable<TAnswer[]> {
+    return this.blockSyncApi.onRestoreAnswers<TAnswer>(this.blockId).pipe(
+      filter((answers): answers is TAnswer[] => this.isEnabled() && !!answers),
     );
   }
 
-  public onData(): Observable<TAnswer> {
-    return this.blockSyncApi.onData<TAnswer>(this.blockId).pipe(
+  public onAnswer(): Observable<TAnswer> {
+    return this.blockSyncApi.onAnswer<TAnswer>(this.blockId).pipe(
       filter(() => this.isEnabled()),
     );
   }
 
-  public add(data: TAnswer): void {
+  public addAnswer(answer: TAnswer): void {
     if (!this.isEnabled()) {
       return;
     }
 
-    this.blockSyncApi.add(this.blockId, data);
+    this.blockSyncApi.addAnswer(this.blockId, answer);
   }
 
-  public requestRestore(): void {
+  public requestRestoreAnswers(): void {
     if (!this.isEnabled()) {
       return;
     }
 
-    this.blockSyncApi.requestRestore(this.blockId);
+    this.blockSyncApi.requestRestoreAnswers(this.blockId);
   }
 
   public sendEvent<T = void>(event: string, data: T): void {
@@ -93,17 +93,17 @@ export class BlockBaseSyncStrategy<TValue, TAnswer extends IBlockAnswer<TValue> 
         filter(() => this.valueIsNotFromSync()),
         takeUntilDestroyed(this, this.destroyedOptions),
       )
-      .subscribe(answer => this.add(answer));
+      .subscribe(answer => this.addAnswer(answer));
 
     // restoring answers
-    this.onRestore()
+    this.onRestoreAnswers()
       .pipe(
         takeUntilDestroyed(this, this.destroyedOptions),
       )
-      .subscribe(data => model.setAnswers(data));
+      .subscribe(answers => model.setAnswers(answers));
 
     // new value from sync
-    this.onData()
+    this.onAnswer()
       .pipe(
         takeUntilDestroyed(this, this.destroyedOptions),
       )

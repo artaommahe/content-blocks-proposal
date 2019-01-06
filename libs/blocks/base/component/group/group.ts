@@ -20,7 +20,7 @@ export class BlockGroupComponent implements OnChanges {
     if (changes.config) {
       const config: IBlockConfig = JSON.parse(this.config);
 
-      this.blockConfig.set(config);
+      this.blockConfig.merge(config);
     }
   }
 }

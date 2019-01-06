@@ -1,8 +1,8 @@
 export enum BLOCK_SYNC_EVENTS {
-  add = 'syncAdd',
-  restore = 'syncRestore',
-  requestRestore = 'syncRequestRestore',
-  data = 'syncData',
+  addAnswer = 'syncAddAnswer',
+  restoreAnswers = 'syncRestoreAnswers',
+  requestRestoreAnswers = 'syncRequestRestoreAnswers',
+  answer = 'syncAnswer',
   sendEvent = 'syncSendEvent',
   event = 'syncEvent',
 }

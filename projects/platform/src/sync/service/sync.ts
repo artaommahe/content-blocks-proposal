@@ -7,8 +7,8 @@ import { ISyncData } from '../interface';
 import { shareReplay, delayWhen, map } from 'rxjs/operators';
 import { TBlockId } from '@skyeng/libs/blocks/base/interface';
 import {
-  IBlockSyncRequestRestore, IBlockSyncAdd, IBlockSyncRestore,
-  IBlockSyncData, IBlockSyncEvent,
+  IBlockSyncRequestRestoreAnswers, IBlockSyncAddAnswer, IBlockSyncRestoreAnswers,
+  IBlockSyncAnswer, IBlockSyncEvent,
 } from '@skyeng/libs/blocks/base/sync/interface';
 import { IBlockAnswer } from '@skyeng/libs/blocks/base/model/interface';
 import { SYNC_EVENS } from '../const';
@@ -34,7 +34,7 @@ export class SyncService {
       .subscribe(data => this.data = data);
 
     // sending initial data on restore request
-    blocksListenGlobalEvent<IBlockSyncRequestRestore>(BLOCK_SYNC_EVENTS.requestRestore)
+    blocksListenGlobalEvent<IBlockSyncRequestRestoreAnswers>(BLOCK_SYNC_EVENTS.requestRestoreAnswers)
       .pipe(
         delayWhen(() => dataLoaded$),
         map(({ blockId }) => ({
@@ -43,14 +43,14 @@ export class SyncService {
         }))
       )
       .subscribe(eventData =>
-        blocksDispatchGlobalEvent<IBlockSyncRestore<any>>(BLOCK_SYNC_EVENTS.restore, eventData)
+        blocksDispatchGlobalEvent<IBlockSyncRestoreAnswers<any>>(BLOCK_SYNC_EVENTS.restoreAnswers, eventData)
       );
 
-    blocksListenGlobalEvent<IBlockSyncAdd<any>>(BLOCK_SYNC_EVENTS.add)
+    blocksListenGlobalEvent<IBlockSyncAddAnswer<any>>(BLOCK_SYNC_EVENTS.addAnswer)
       .subscribe(({ blockId, data }) => {
-        this.add(blockId, data);
+        this.addAnswer(blockId, data);
 
-        this.rtmService.send<IBlockSyncAdd<any>>(SYNC_EVENS.add, { blockId, data });
+        this.rtmService.send<IBlockSyncAddAnswer<any>>(SYNC_EVENS.add, { blockId, data });
       });
 
     blocksListenGlobalEvent<IBlockSyncEvent<any>>(BLOCK_SYNC_EVENTS.sendEvent)
@@ -60,9 +60,9 @@ export class SyncService {
   }
 
   private listenRtmEvents(): void {
-    this.rtmService.on<IBlockSyncAdd<any>>(SYNC_EVENS.add)
+    this.rtmService.on<IBlockSyncAddAnswer<any>>(SYNC_EVENS.add)
       .subscribe(data =>
-        blocksDispatchGlobalEvent<IBlockSyncData<any>>(BLOCK_SYNC_EVENTS.data, data)
+        blocksDispatchGlobalEvent<IBlockSyncAnswer<any>>(BLOCK_SYNC_EVENTS.answer, data)
       );
 
     this.rtmService.on<IBlockSyncEvent<any>>(SYNC_EVENS.send)
@@ -75,12 +75,12 @@ export class SyncService {
     return this.data[blockId] || null;
   }
 
-  private add(blockId: TBlockId, blockData: IBlockAnswer<any>): void {
+  private addAnswer(blockId: TBlockId, answer: IBlockAnswer<any>): void {
     this.data = {
       ...this.data,
       [ blockId ]: [
         ...(this.data[blockId] || []),
-        blockData,
+        answer,
       ],
     };
 

@@ -15,23 +15,23 @@ export interface IBlockSyncStrategyConfig<TValue, TAnswer extends IBlockAnswer<T
   model?: BlockBaseModel<TValue, TAnswer>;
 }
 
-export interface IBlockSyncData<TValue> {
+export interface IBlockSyncAnswer<TAnswer extends IBlockAnswer<any>> {
   blockId: TBlockId;
-  data: TValue;
+  data: TAnswer;
 }
 
-export interface IBlockSyncAdd<TValue> {
+export interface IBlockSyncAddAnswer<TAnswer extends IBlockAnswer<any>> {
   blockId: TBlockId;
-  data: IBlockAnswer<TValue>;
+  data: TAnswer;
 }
 
-export interface IBlockSyncRequestRestore {
+export interface IBlockSyncRequestRestoreAnswers {
   blockId: TBlockId;
 }
 
-export interface IBlockSyncRestore<TValue> {
+export interface IBlockSyncRestoreAnswers<TAnswer extends IBlockAnswer<any>> {
   blockId: TBlockId;
-  data: IBlockAnswer<TValue>[] | null;
+  data: TAnswer[] | null;
 }
 
 export interface IBlockSyncEventData<T> {

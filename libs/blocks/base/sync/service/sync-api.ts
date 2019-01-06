@@ -4,37 +4,37 @@ import { blocksListenGlobalEvent, blocksDispatchGlobalEvent } from '../../helper
 import { filter, map } from 'rxjs/operators';
 import { BLOCK_SYNC_EVENTS } from '../const';
 import {
-  IBlockSyncData, IBlockSyncRequestRestore, IBlockSyncAdd,
-  IBlockSyncRestore, IBlockSyncEventData, IBlockSyncEvent,
+  IBlockSyncAnswer, IBlockSyncRequestRestoreAnswers, IBlockSyncAddAnswer,
+  IBlockSyncRestoreAnswers, IBlockSyncEventData, IBlockSyncEvent,
 } from '../interface';
 import { Injectable } from '@angular/core';
 import { IBlockAnswer } from '../../model/interface';
 
 @Injectable({ providedIn: 'root' })
 export class BlockSyncApi {
-  public onRestore<TValue>(blockId: TBlockId): Observable<IBlockAnswer<TValue>[] | null> {
-    return blocksListenGlobalEvent<IBlockSyncRestore<TValue>>(BLOCK_SYNC_EVENTS.restore).pipe(
+  public onRestoreAnswers<TAnswer extends IBlockAnswer<any>>(blockId: TBlockId): Observable<TAnswer[] | null> {
+    return blocksListenGlobalEvent<IBlockSyncRestoreAnswers<TAnswer>>(BLOCK_SYNC_EVENTS.restoreAnswers).pipe(
       filter(event => (event.blockId === blockId)),
       map(({ data }) => data),
     );
   }
 
-  public onData<TAnswer>(blockId: TBlockId): Observable<TAnswer> {
-    return blocksListenGlobalEvent<IBlockSyncData<TAnswer>>(BLOCK_SYNC_EVENTS.data).pipe(
+  public onAnswer<TAnswer extends IBlockAnswer<any>>(blockId: TBlockId): Observable<TAnswer> {
+    return blocksListenGlobalEvent<IBlockSyncAnswer<TAnswer>>(BLOCK_SYNC_EVENTS.answer).pipe(
       filter(event => (event.blockId === blockId)),
       map(({ data }) => data),
     );
   }
 
-  public add<TValue>(blockId: TBlockId, data: IBlockAnswer<TValue>): void {
-    blocksDispatchGlobalEvent<IBlockSyncAdd<TValue>>(BLOCK_SYNC_EVENTS.add, {
+  public addAnswer<TAnswer extends IBlockAnswer<any>>(blockId: TBlockId, data: TAnswer): void {
+    blocksDispatchGlobalEvent<IBlockSyncAddAnswer<TAnswer>>(BLOCK_SYNC_EVENTS.addAnswer, {
       blockId,
       data,
     });
   }
 
-  public requestRestore(blockId: TBlockId): void {
-    blocksDispatchGlobalEvent<IBlockSyncRequestRestore>(BLOCK_SYNC_EVENTS.requestRestore, {
+  public requestRestoreAnswers(blockId: TBlockId): void {
+    blocksDispatchGlobalEvent<IBlockSyncRequestRestoreAnswers>(BLOCK_SYNC_EVENTS.requestRestoreAnswers, {
       blockId,
     });
   }
