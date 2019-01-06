@@ -1,7 +1,7 @@
 <div class="root"
-     [class.-correct]="currentAnswer?.isCorrect === true"
-     [class.-wrong]="currentAnswer?.isCorrect === false">
-  <ng-container *ngIf="currentAnswer?.isCorrect !== true">
+     [class.-correct]="isCorrect()"
+     [class.-wrong]="isWrong()">
+  <ng-container *ngIf="!isCorrect()">
     <div class="input-container">
       <input class="input"
              [value]="currentAnswer?.value"
@@ -16,9 +16,14 @@
     <div class="correct-answers">
       {{ correctAnswers.join(', ') }}
     </div>
+
+    <button *ngIf="canUseKey()"
+            (click)="onKeyClick()">
+      use key
+    </button>
   </ng-container>
 
-  <div *ngIf="currentAnswer?.isCorrect === true"
+  <div *ngIf="isCorrect()"
        class="correct-answer">
     {{ currentAnswer.value }}
   </div>

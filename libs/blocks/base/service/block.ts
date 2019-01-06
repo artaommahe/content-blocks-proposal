@@ -28,6 +28,7 @@ export class BlockService {
       blockId: config.blockId,
       model: config.model,
       blockConfig: config.blockConfig,
+      ...(config.scoreStrategyConfig || {})
     });
 
     const sync = new BlockBaseSyncStrategy<TValue, TAnswer>({

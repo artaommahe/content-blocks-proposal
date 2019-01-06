@@ -1,18 +1,20 @@
 import { MAX_SCORE_DEFAULT } from '../const';
-import { IBlockScore, IBlockScoreStrategyConfig } from '../interface';
-import { filter, withLatestFrom, scan, map, pairwise, startWith, concatAll, debounceTime } from 'rxjs/operators';
+import { IBlockScore, IBlockScoreStrategyConfig, TScoreHandler } from '../interface';
+import { scan, map, pairwise, startWith, concatAll, debounceTime } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { BlockScoreApi } from '../service/score-api';
 import { TBlockId } from '../../interface';
 import { BlockBaseModel } from '../../model/base';
 import { BlockConfig } from '../../config/config';
 import { IBlockAnswer } from '../../model/interface';
+import { getStreamValue } from '@skyeng/libs/base/helpers';
 
 export class BlockBaseScoreStrategy {
   private blockScoreApi: BlockScoreApi;
   private blockId: TBlockId;
   private model: BlockBaseModel<any> | undefined;
   private blockConfig: BlockConfig;
+  private handlers: TScoreHandler[];
 
   private destroyedOptions = { initMethod: this.init, destroyMethod: this.destroy };
 
@@ -23,6 +25,14 @@ export class BlockBaseScoreStrategy {
     this.blockId = config.blockId;
     this.model = config.model;
     this.blockConfig = config.blockConfig;
+
+    // TODO: convert handlers to Observables
+    this.handlers = [
+      this.handleSameScore,
+      ...(config.handlers || []),
+      this.handleCorrectScore,
+      this.handleWrongScore,
+    ];
 
     this.init();
   }
@@ -68,12 +78,9 @@ export class BlockBaseScoreStrategy {
 
     answer$
       .pipe(
-        map(answer => answer ? answer.isCorrect : null),
-        filter((isCorrect): isCorrect is boolean => isCorrect !== null),
-        withLatestFrom(model.correctAnswers$),
-        // TODO: distinctUntiChanged, dont send same score when maxScore is reached
-        scan<[ boolean, string[] ], IBlockScore>(
-          (score, [ isCorrect, correctAnswers ]) => this.handleScore(score, isCorrect, correctAnswers),
+        // TODO: distinctUntiChanged, dont send same score
+        scan<IBlockAnswer<any>, IBlockScore>(
+          (score, answer) => this.handleScore(score, answer),
           startingScore
         ),
         debounceTime(0),
@@ -90,22 +97,51 @@ export class BlockBaseScoreStrategy {
     };
   }
 
-  private handleScore(score: IBlockScore, isCorrect: boolean, correctAnswers: string[]): IBlockScore {
-    if ((score.right + score.wrong) >= score.maxScore) {
+  protected handleScore = (score: IBlockScore, answer: IBlockAnswer<any>): IBlockScore => {
+    for (const handler of this.handlers) {
+      const newScore = handler(score, answer);
+
+      if (newScore) {
+        score = newScore;
+        break;
+      }
+    }
+
+    return score;
+  }
+
+  protected handleSameScore: TScoreHandler = (score, answer) => {
+    if (
+      ((score.right + score.wrong) >= score.maxScore)
+      || (answer.isCorrect === null)
+    ) {
       return score;
     }
 
-    if (isCorrect) {
-      return {
-        ...score,
-        right: score.right + (score.maxScore - score.wrong),
-      };
+    return;
+  }
+
+  protected handleCorrectScore: TScoreHandler = (score, answer) => {
+    if (answer.isCorrect !== true) {
+      return;
     }
-    else {
-      return {
-        ...score,
-        wrong: score.wrong + (score.maxScore / (correctAnswers.length - 1)),
-      };
+
+    return {
+      ...score,
+      right: score.right + (score.maxScore - score.wrong),
+    };
+  }
+
+  protected handleWrongScore: TScoreHandler = (score, answer) => {
+    if (answer.isCorrect !== false) {
+      return;
     }
+
+    const correctAnswers = getStreamValue(this.model!.correctAnswers$);
+
+    return {
+      ...score,
+      wrong: score.wrong + (score.maxScore / (correctAnswers.length - 1)),
+    };
   }
 }

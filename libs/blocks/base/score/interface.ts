@@ -2,6 +2,7 @@ import { TBlockId } from '../interface';
 import { BlockBaseModel } from '../model/base';
 import { BlockScoreApi } from './service/score-api';
 import { BlockConfig } from '../config/config';
+import { IBlockAnswer } from '../model/interface';
 
 export interface IBlockScoreConfig {
   enabled?: boolean;
@@ -13,6 +14,7 @@ export interface IBlockScoreStrategyConfig {
   blockId: TBlockId;
   blockConfig: BlockConfig;
   model?: BlockBaseModel<any, any>;
+  handlers?: TScoreHandler<any>[];
 }
 
 export interface IBlockScore {
@@ -31,3 +33,9 @@ export interface IBlockScoreSet {
 export interface IBlockScoreRemove {
   blockId: TBlockId;
 }
+
+// TODO: (?) pass ScoreStrategy as last/first argument
+export type TScoreHandler<TAnswer extends IBlockAnswer<any> = IBlockAnswer<any>> = (
+  score: IBlockScore,
+  answer: TAnswer
+) => IBlockScore | undefined;
