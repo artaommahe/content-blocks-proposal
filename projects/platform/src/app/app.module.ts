@@ -4,6 +4,7 @@ import { AppComponent } from './component/app/app';
 import { BlocksModule } from '@skyeng/libs/blocks/module';
 import { ScoreModule } from '../score/module';
 import { SyncService } from '../sync/service/sync';
+import { EventsComponent } from './component/events/events';
 
 @NgModule({
   imports: [
@@ -14,6 +15,7 @@ import { SyncService } from '../sync/service/sync';
   ],
   declarations: [
     AppComponent,
+    EventsComponent,
   ],
   providers: [],
   bootstrap: [AppComponent],

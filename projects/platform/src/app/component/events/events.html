@@ -1,0 +1,22 @@
+<div class="events">
+  <b>Events</b>
+
+  <br>
+
+  - send
+  <input class="send-event"
+         type="text"
+         (input)="eventData = $event.target.value" />
+
+  <button (click)="sendEvent()">send</button>
+
+  <br>
+
+  - log
+  <div class="log">
+    <div *ngFor="let event of (events$ | async)"
+         class="event">
+      {{ event | json }}
+    </div>
+  </div>
+</div>

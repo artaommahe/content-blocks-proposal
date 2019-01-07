@@ -1,4 +1,3 @@
-
 <div *ngIf="initDone$ | async"
      class="blocks">
   <sky-block-group [attr.config]="config$ | async">
@@ -13,27 +12,4 @@
 
 <score></score>
 
-<div class="controls">
-  <div class="events">
-    Events
-
-    <br>
-
-    - send
-    <input type="text"
-           style="width: 600px;"
-           (input)="eventData = $event.target.value" />
-
-    <button (click)="sendEvent()">send</button>
-
-    <br>
-
-    - log
-    <div class="log">
-      <div *ngFor="let event of (events$ | async)"
-           class="event">
-        {{ event | json }}
-      </div>
-    </div>
-  </div>
-</div>
+<events></events>
