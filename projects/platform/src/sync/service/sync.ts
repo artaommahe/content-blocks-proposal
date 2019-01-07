@@ -25,6 +25,16 @@ export class SyncService {
     this.listenRtmEvents();
   }
 
+  public reset(blockId?: TBlockId, sync = true): void {
+    blocksDispatchGlobalEvent<IBlockSyncReset>(BLOCK_SYNC_EVENTS.reset, { blockId });
+
+    this.resetBlocksData(blockId, sync);
+
+    if (sync) {
+      this.rtmService.send<IBlockSyncReset>(SYNC_EVENS.reset, { blockId });
+    }
+  }
+
   private listenBlocksEvents(): void {
     const dataLoaded$ = this.syncApiService.load().pipe(
       shareReplay(1),
@@ -57,12 +67,6 @@ export class SyncService {
       .subscribe(data => {
         this.rtmService.send<IBlockSyncEvent<any>>(SYNC_EVENS.send, data);
       });
-
-    blocksListenGlobalEvent<IBlockSyncReset>(BLOCK_SYNC_EVENTS.reset)
-      .pipe(
-        map(data => data ? data.blockId : undefined),
-      )
-      .subscribe(blockId => this.resetBlocksData(blockId));
   }
 
   private listenRtmEvents(): void {
@@ -75,6 +79,9 @@ export class SyncService {
       .subscribe(data =>
         blocksDispatchGlobalEvent<IBlockSyncEvent<any>>(BLOCK_SYNC_EVENTS.event, data)
       );
+
+    this.rtmService.on<IBlockSyncReset>(SYNC_EVENS.reset)
+      .subscribe(data => this.reset(data.blockId, false));
   }
 
   private getBlockData(blockId: TBlockId): IBlockAnswer<any>[] | null {
@@ -93,7 +100,7 @@ export class SyncService {
     this.syncApiService.store(this.blocksData);
   }
 
-  private resetBlocksData(blockId?: TBlockId): void {
+  private resetBlocksData(blockId?: TBlockId, sync = true): void {
     let newBlocksData: ISyncBlocksData = {};
 
     if (blockId) {
@@ -103,6 +110,8 @@ export class SyncService {
 
     this.blocksData = newBlocksData;
 
-    this.syncApiService.store(this.blocksData);
+    if (sync) {
+      this.syncApiService.store(this.blocksData);
+    }
   }
 }
