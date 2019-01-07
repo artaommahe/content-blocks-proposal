@@ -19,6 +19,7 @@ enum INPUT_EVENTS {
     <ng-content></ng-content>
 
     <sky-input-view [answers]="model.answers$ | async"
+                    [blockId]="id"
                     [correctAnswers]="model.correctAnswers$ | async"
                     [currentAnswer]="model.currentAnswer$ | async"
                     [value]="value$ | async"

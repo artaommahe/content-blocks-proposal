@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { TBlockId } from '../../interface';
 import { IBlockScoreRemove, IBlockScore, IBlockScoreSet } from '../interface';
 import { BLOCK_SCORE_EVENT } from '../const';
-import { blocksDispatchGlobalEvent } from '../../events/events';
+import { blocksDispatchGlobalEvent, blocksListenGlobalEvent } from '../../events/events';
+import { Observable } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class BlockScoreApi {
@@ -17,5 +19,12 @@ export class BlockScoreApi {
       blockId,
       score,
     });
+  }
+
+  public onSet(blockId: TBlockId): Observable<IBlockScore> {
+    return blocksListenGlobalEvent<IBlockScoreSet>(BLOCK_SCORE_EVENT.set).pipe(
+      filter(data => data.blockId === blockId),
+      map(({ score }) => score),
+    );
   }
 }

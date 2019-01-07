@@ -5,6 +5,7 @@ import {
 import { TInputData, TInputAnswer } from '../../interface';
 import { fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
+import { TBlockId } from '@skyeng/libs/blocks/base/interface';
 
 const KEY_AVAILABLE_ANSWERS_COUNT = 3;
 
@@ -16,6 +17,7 @@ const KEY_AVAILABLE_ANSWERS_COUNT = 3;
 })
 export class InputViewComponent implements AfterViewInit, OnDestroy {
   @Input() answers: TInputAnswer[];
+  @Input() blockId: TBlockId;
   @Input() correctAnswers: string[];
   @Input() currentAnswer: TInputAnswer | undefined;
   @Input() value: TInputAnswer;
