@@ -1,6 +1,6 @@
 <div *ngIf="initDone$ | async"
      class="blocks">
-  <sky-block-group [attr.config]="config$ | async">
+  <sky-block-group [attr.config]="config">
     <sky-input id="input1">
       <sky-input-answer>test</sky-input-answer>
       <sky-input-answer>smth here</sky-input-answer>
@@ -10,6 +10,11 @@
   </sky-block-group>
 </div>
 
-<score></score>
 
-<events></events>
+<div class="controls">
+  <score></score>
+
+  <config (configChange)="onConfigChange($event)"></config>
+
+  <events></events>
+</div>

@@ -5,6 +5,7 @@ import { BlocksModule } from '@skyeng/libs/blocks/module';
 import { ScoreModule } from '../score/module';
 import { SyncService } from '../sync/service/sync';
 import { EventsComponent } from './component/events/events';
+import { ConfigComponent } from './component/config/config';
 
 @NgModule({
   imports: [
@@ -16,6 +17,7 @@ import { EventsComponent } from './component/events/events';
   declarations: [
     AppComponent,
     EventsComponent,
+    ConfigComponent,
   ],
   providers: [],
   bootstrap: [AppComponent],

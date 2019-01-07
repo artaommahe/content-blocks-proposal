@@ -1,0 +1,23 @@
+<div class="config">
+  <b>Config</b>
+
+  <div class="field">
+    Score |
+    <label>
+      <input type="checkbox"
+             [checked]="config.score?.enabled"
+             (change)="setField({ score: { enabled: $event.target.checked } })">
+      enabled
+    </label>
+  </div>
+
+  <div class="field">
+    Sync |
+    <label>
+      <input type="checkbox"
+             [checked]="config.sync?.enabled"
+             (change)="setField({ sync: { enabled: $event.target.checked } })">
+      enabled
+    </label>
+  </div>
+</div>

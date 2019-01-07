@@ -1,3 +1,10 @@
 .blocks {
   margin-bottom: 30px;
 }
+
+.controls {
+  > * {
+    display: block;
+    margin-top: 10px;
+  }
+}

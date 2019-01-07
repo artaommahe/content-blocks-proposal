@@ -49,10 +49,6 @@ export class BlockBaseScoreStrategy {
   }
 
   private init(): void {
-    if (!this.isEnabled()) {
-      return;
-    }
-
     const startingScore = this.getStartingScore();
     this.set(startingScore);
 

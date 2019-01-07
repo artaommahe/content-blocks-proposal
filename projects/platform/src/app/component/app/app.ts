@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable, timer, BehaviorSubject } from 'rxjs';
-import { mapTo, map } from 'rxjs/operators';
+import { Component } from '@angular/core';
+import { timer } from 'rxjs';
+import { mapTo } from 'rxjs/operators';
 import { IBlockConfig } from '@skyeng/libs/blocks/base/interface';
 
 @Component({
@@ -8,25 +8,12 @@ import { IBlockConfig } from '@skyeng/libs/blocks/base/interface';
   templateUrl: 'app.html',
   styleUrls: [ 'app.scss' ],
 })
-export class AppComponent implements OnInit {
-  private config = new BehaviorSubject<IBlockConfig>({});
-
-  public config$: Observable<string>;
+export class AppComponent {
+  public config = '{}';
   // uglyhack only for example, strange bug with empty custom elements inputs
   public initDone$ = timer(0).pipe(mapTo(true));
 
-  public ngOnInit() {
-    this.config.next({
-      sync: {
-        enabled: true,
-      },
-      score: {
-        enabled: true,
-      }
-    });
-
-    this.config$ = this.config.asObservable().pipe(
-      map(config => JSON.stringify(config)),
-    );
+  public onConfigChange(config: IBlockConfig) {
+    this.config = JSON.stringify(config);
   }
 }
