@@ -1,7 +1,6 @@
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { map, skip, debounceTime, take, mapTo } from 'rxjs/operators';
 import { IBlockAnswer } from './interface';
-import { getStreamValue } from '@skyeng/libs/base/helpers';
 
 export class BlockBaseModel<
   TValue,
@@ -40,9 +39,9 @@ export class BlockBaseModel<
   }
 
   public addAnswer(answerPart: Partial<TAnswer> & TAnswerData): void {
-    const currentValue = getStreamValue(this.currentAnswer$);
+    const currentAnswer = this.getCurrentAnswer();
 
-    if (currentValue && (answerPart.value === currentValue.value)) {
+    if (currentAnswer && (answerPart.value === currentAnswer.value)) {
       return;
     }
 
@@ -62,6 +61,12 @@ export class BlockBaseModel<
 
   public getCorrectAnswers(): TValue[] {
     return this.correctAnswers.getValue();
+  }
+
+  public getCurrentAnswer(): TAnswer | undefined {
+    const answers = this.answers.getValue();
+
+    return answers[0];
   }
 
   private createAnswer(answer: Partial<TAnswer> & TAnswerData): TAnswer {

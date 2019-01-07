@@ -4,7 +4,6 @@ import { BlockService } from '@skyeng/libs/blocks/base/service/block';
 import { TInputData, TInputAnswer } from '../../interface';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { getBlockConfig } from '@skyeng/libs/blocks/base/helpers';
-import { getStreamValue } from '@skyeng/libs/base/helpers';
 import { InputModel } from '../../exercise/model';
 import { handleKeyUsedScore } from '@skyeng/libs/blocks/base/score/handlers/key';
 import { BehaviorSubject } from 'rxjs';
@@ -78,7 +77,7 @@ export class InputComponent implements OnInit, OnDestroy {
   }
 
   public useKey(): void {
-    const correctAnswers = getStreamValue(this.model.correctAnswers$);
+    const correctAnswers = this.model.getCorrectAnswers();
 
     if (!correctAnswers.length) {
       return;
