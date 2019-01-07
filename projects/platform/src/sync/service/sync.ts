@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { RtmService } from './rtm';
 import { SyncApiService } from './sync-api';
 import { BLOCK_SYNC_EVENTS } from '@skyeng/libs/blocks/base/sync/const';
-import { ISyncData } from '../interface';
+import { ISyncBlocksData } from '../interface';
 import { shareReplay, delayWhen, map } from 'rxjs/operators';
 import { TBlockId } from '@skyeng/libs/blocks/base/interface';
 import {
   IBlockSyncRequestRestoreAnswers, IBlockSyncAddAnswer, IBlockSyncRestoreAnswers,
-  IBlockSyncAnswer, IBlockSyncEvent,
+  IBlockSyncAnswer, IBlockSyncEvent, IBlockSyncReset,
 } from '@skyeng/libs/blocks/base/sync/interface';
 import { IBlockAnswer } from '@skyeng/libs/blocks/base/model/interface';
 import { SYNC_EVENS } from '../const';
@@ -15,7 +15,7 @@ import { blocksListenGlobalEvent, blocksDispatchGlobalEvent } from '@skyeng/libs
 
 @Injectable({ providedIn: 'root' })
 export class SyncService {
-  private data: ISyncData;
+  private blocksData: ISyncBlocksData;
 
   constructor(
     private rtmService: RtmService,
@@ -31,7 +31,7 @@ export class SyncService {
     );
 
     dataLoaded$
-      .subscribe(data => this.data = data);
+      .subscribe(blocksData => this.blocksData = blocksData);
 
     // sending initial data on restore request
     blocksListenGlobalEvent<IBlockSyncRequestRestoreAnswers>(BLOCK_SYNC_EVENTS.requestRestoreAnswers)
@@ -57,6 +57,12 @@ export class SyncService {
       .subscribe(data => {
         this.rtmService.send<IBlockSyncEvent<any>>(SYNC_EVENS.send, data);
       });
+
+    blocksListenGlobalEvent<IBlockSyncReset>(BLOCK_SYNC_EVENTS.reset)
+      .pipe(
+        map(data => data ? data.blockId : undefined),
+      )
+      .subscribe(blockId => this.resetBlocksData(blockId));
   }
 
   private listenRtmEvents(): void {
@@ -72,18 +78,31 @@ export class SyncService {
   }
 
   private getBlockData(blockId: TBlockId): IBlockAnswer<any>[] | null {
-    return this.data[blockId] || null;
+    return this.blocksData[blockId] || null;
   }
 
   private addAnswer(blockId: TBlockId, answer: IBlockAnswer<any>): void {
-    this.data = {
-      ...this.data,
+    this.blocksData = {
+      ...this.blocksData,
       [ blockId ]: [
-        ...(this.data[blockId] || []),
+        ...(this.blocksData[blockId] || []),
         answer,
       ],
     };
 
-    this.syncApiService.store(this.data);
+    this.syncApiService.store(this.blocksData);
+  }
+
+  private resetBlocksData(blockId?: TBlockId): void {
+    let newBlocksData: ISyncBlocksData = {};
+
+    if (blockId) {
+      newBlocksData = { ...this.blocksData };
+      delete newBlocksData[blockId];
+    }
+
+    this.blocksData = newBlocksData;
+
+    this.syncApiService.store(this.blocksData);
   }
 }

@@ -43,3 +43,7 @@ export interface IBlockSyncEvent<T> {
   blockId: TBlockId;
   eventData: IBlockSyncEventData<T>;
 }
+
+export interface IBlockSyncReset {
+  blockId?: TBlockId;
+}

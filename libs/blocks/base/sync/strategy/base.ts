@@ -1,7 +1,7 @@
 import { TBlockId } from '../../interface';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { IBlockSyncStrategyConfig } from '../interface';
+import { IBlockSyncStrategyConfig, IBlockSyncReset } from '../interface';
 import { BlockSyncApi } from '../service/sync-api';
 import { BlockBaseModel } from '../../model/base';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
@@ -41,9 +41,9 @@ export class BlockBaseSyncStrategy<TValue, TAnswer extends IBlockAnswer<TValue> 
     //
   }
 
-  public onRestoreAnswers(): Observable<TAnswer[]> {
+  public onRestoreAnswers(): Observable<TAnswer[] | null> {
     return this.blockSyncApi.onRestoreAnswers<TAnswer>(this.blockId).pipe(
-      filter((answers): answers is TAnswer[] => this.isEnabled() && !!answers),
+      filter(() => this.isEnabled()),
     );
   }
 
@@ -83,11 +83,18 @@ export class BlockBaseSyncStrategy<TValue, TAnswer extends IBlockAnswer<TValue> 
     );
   }
 
+  public onReset(): Observable<IBlockSyncReset> {
+    return this.blockSyncApi.onReset(this.blockId).pipe(
+      filter(() => this.isEnabled()),
+    );
+  }
+
   private isEnabled(): boolean {
     return !!this.blockConfig.get([ 'sync', 'enabled' ]);
   }
 
   private bindToModel(model: BlockBaseModel<TValue, TAnswer>): void {
+    // sync new value to partners/storage
     model.newAnswer$
       .pipe(
         filter(() => this.valueIsNotFromSync()),
@@ -111,6 +118,13 @@ export class BlockBaseSyncStrategy<TValue, TAnswer extends IBlockAnswer<TValue> 
         this.valueFromSync = true;
         model.addAnswer(answer);
       });
+
+    // reset model's value
+    this.onReset()
+      .pipe(
+        takeUntilDestroyed(this, this.destroyedOptions),
+      )
+      .subscribe(() => model.setAnswers(null));
   }
 
   private valueIsNotFromSync(): boolean {

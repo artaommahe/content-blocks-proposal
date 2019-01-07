@@ -1,6 +1,6 @@
 import { MAX_SCORE_DEFAULT } from '../const';
 import { IBlockScore, IBlockScoreStrategyConfig, TScoreHandler } from '../interface';
-import { scan, map, pairwise, startWith, concatAll, debounceTime } from 'rxjs/operators';
+import { scan, map, pairwise, startWith, concatAll, debounceTime, filter, switchMap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { BlockScoreApi } from '../service/score-api';
 import { TBlockId } from '../../interface';
@@ -49,9 +49,6 @@ export class BlockBaseScoreStrategy {
   }
 
   private init(): void {
-    const startingScore = this.getStartingScore();
-    this.set(startingScore);
-
     if (this.model) {
       this.bindToModel(this.model);
     }
@@ -64,21 +61,24 @@ export class BlockBaseScoreStrategy {
   private bindToModel(model: BlockBaseModel<any>): void {
     const startingScore = this.getStartingScore();
 
-    const answer$ = model.answers$.pipe(
-      startWith<IBlockAnswer<any>[]>([]),
+    const score$ = model.answers$.pipe(
       pairwise(),
       map(([ prev, next ]) => next.filter(answer => !prev.includes(answer))),
       concatAll(),
+      // TODO: distinctUntiChanged, dont send same score
+      scan<IBlockAnswer<any>, IBlockScore>(
+        (score, answer) => this.handleScore(score, answer),
+        startingScore
+      ),
+      startWith(startingScore),
+      debounceTime(0),
     );
 
-    answer$
+    model.answers$
       .pipe(
-        // TODO: distinctUntiChanged, dont send same score
-        scan<IBlockAnswer<any>, IBlockScore>(
-          (score, answer) => this.handleScore(score, answer),
-          startingScore
-        ),
-        debounceTime(0),
+        // reset score on empty answers
+        filter(answers => !answers.length),
+        switchMap(() => score$),
         takeUntilDestroyed(this, this.destroyedOptions),
       )
       .subscribe(score => this.set(score));

@@ -55,8 +55,14 @@ export class BlockBaseModel<
     this.newAnswer.next(answer);
   }
 
-  public setAnswers(answers: TAnswer[]): void {
-    this.answers.next(answers);
+  public setAnswers(newAnswers: TAnswer[] | null): void {
+    const answers = this.answers.getValue();
+
+    if ((!newAnswers || !newAnswers.length) && !answers.length) {
+      return;
+    }
+
+    this.answers.next(newAnswers || []);
   }
 
   public getCorrectAnswers(): TValue[] {

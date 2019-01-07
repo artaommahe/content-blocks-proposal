@@ -1,22 +1,28 @@
 <div class="events">
   <b>Events</b>
 
-  <br>
+  <div class="row">
+    <button (click)="reset()">
+      reset
+    </button>
+  </div>
 
-  - send
-  <input class="send-event"
-         type="text"
-         (input)="eventData = $event.target.value" />
+  <div class="row">
+    - send
+    <input class="send-event"
+           type="text"
+           (input)="eventData = $event.target.value" />
 
-  <button (click)="sendEvent()">send</button>
+    <button (click)="sendEvent()">send</button>
+  </div>
 
-  <br>
-
-  - log
-  <div class="log">
-    <div *ngFor="let event of (events$ | async)"
-         class="event">
-      {{ event | json }}
+  <div class="row">
+    - log
+    <div class="log">
+      <div *ngFor="let event of (events$ | async)"
+           class="event">
+        {{ event | json }}
+      </div>
     </div>
   </div>
 </div>

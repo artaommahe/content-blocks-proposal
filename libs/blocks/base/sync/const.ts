@@ -5,4 +5,5 @@ export enum BLOCK_SYNC_EVENTS {
   answer = 'syncAnswer',
   sendEvent = 'syncSendEvent',
   event = 'syncEvent',
+  reset = 'syncReset',
 }

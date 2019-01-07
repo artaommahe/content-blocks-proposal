@@ -3,6 +3,8 @@ import { Observable } from 'rxjs';
 import { scan } from 'rxjs/operators';
 import { IBlocksEvent } from '@skyeng/libs/blocks/base/events/interface';
 import { blocksListenAllGlobalEvents, blocksDispatchGlobalEvent } from '@skyeng/libs/blocks/base/events/events';
+import { BLOCK_SYNC_EVENTS } from '@skyeng/libs/blocks/base/sync/const';
+import { IBlockSyncReset } from '@skyeng/libs/blocks/base/sync/interface';
 
 @Component({
   selector: 'events',
@@ -32,5 +34,9 @@ export class EventsComponent implements OnInit {
     }
 
     blocksDispatchGlobalEvent(eventData.name, eventData.data);
+  }
+
+  public reset(): void {
+    blocksDispatchGlobalEvent<IBlockSyncReset>(BLOCK_SYNC_EVENTS.reset, {});
   }
 }

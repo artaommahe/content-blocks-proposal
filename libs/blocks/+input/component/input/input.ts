@@ -6,7 +6,7 @@ import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destro
 import { InputModel } from '../../exercise/model';
 import { handleKeyUsedScore } from '@skyeng/libs/blocks/base/score/handlers/key';
 import { BehaviorSubject } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { getBlockConfig } from '@skyeng/libs/blocks/base/config/helpers';
 
 enum INPUT_EVENTS {
@@ -56,10 +56,10 @@ export class InputComponent implements OnInit, OnDestroy {
 
     this.model.currentAnswer$
       .pipe(
-        filter((currentAnswer): currentAnswer is TInputAnswer => !!currentAnswer),
+        map(currentAnswer => currentAnswer ? currentAnswer.value : ''),
         takeUntilDestroyed(this),
       )
-      .subscribe(currentAnswer => this.value.next(currentAnswer.value));
+      .subscribe(this.value);
   }
 
   public ngOnDestroy() {

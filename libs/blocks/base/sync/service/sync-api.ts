@@ -4,7 +4,7 @@ import { filter, map } from 'rxjs/operators';
 import { BLOCK_SYNC_EVENTS } from '../const';
 import {
   IBlockSyncAnswer, IBlockSyncRequestRestoreAnswers, IBlockSyncAddAnswer,
-  IBlockSyncRestoreAnswers, IBlockSyncEventData, IBlockSyncEvent,
+  IBlockSyncRestoreAnswers, IBlockSyncEventData, IBlockSyncEvent, IBlockSyncReset,
 } from '../interface';
 import { Injectable } from '@angular/core';
 import { IBlockAnswer } from '../../model/interface';
@@ -50,6 +50,12 @@ export class BlockSyncApi {
     return blocksListenGlobalEvent<IBlockSyncEvent<T>>(BLOCK_SYNC_EVENTS.event).pipe(
       filter(event => (event.blockId === blockId) && (event.eventData.event === eventName)),
       map(({ eventData }) => eventData.data),
+    );
+  }
+
+  public onReset(blockId?: TBlockId): Observable<IBlockSyncReset> {
+    return blocksListenGlobalEvent<IBlockSyncReset>(BLOCK_SYNC_EVENTS.reset).pipe(
+      filter(event => !event.blockId || (event.blockId === blockId)),
     );
   }
 }
