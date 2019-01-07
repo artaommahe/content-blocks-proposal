@@ -3,11 +3,11 @@ import { BlockApi } from '@skyeng/libs/blocks/base/service/block-api';
 import { BlockService } from '@skyeng/libs/blocks/base/service/block';
 import { TInputData, TInputAnswer } from '../../interface';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
-import { getBlockConfig } from '@skyeng/libs/blocks/base/helpers';
 import { InputModel } from '../../exercise/model';
 import { handleKeyUsedScore } from '@skyeng/libs/blocks/base/score/handlers/key';
 import { BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { getBlockConfig } from '@skyeng/libs/blocks/base/config/helpers';
 
 enum INPUT_EVENTS {
   typing = 'typing',

@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { Observable, merge } from 'rxjs';
 import { IScore, TScoreEvent, IScores } from '../interface';
 import { shareReplay, scan, map, debounceTime, startWith } from 'rxjs/operators';
-import { blocksListenGlobalEvent } from '@skyeng/libs/blocks/base/helpers';
 import { BLOCK_SCORE_EVENT } from '@skyeng/libs/blocks/base/score/const';
 import { EMPTY_SCORE, TOTAL_SCORE } from '../const';
+import { blocksListenGlobalEvent } from '@skyeng/libs/blocks/base/events/events';
 
 @Injectable({ providedIn: 'root' })
 export class ScoreService {

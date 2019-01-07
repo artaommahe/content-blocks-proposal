@@ -1,6 +1,5 @@
 import { TBlockId } from '../../interface';
 import { Observable } from 'rxjs';
-import { blocksListenGlobalEvent, blocksDispatchGlobalEvent } from '../../helpers';
 import { filter, map } from 'rxjs/operators';
 import { BLOCK_SYNC_EVENTS } from '../const';
 import {
@@ -9,6 +8,7 @@ import {
 } from '../interface';
 import { Injectable } from '@angular/core';
 import { IBlockAnswer } from '../../model/interface';
+import { blocksListenGlobalEvent, blocksDispatchGlobalEvent } from '../../events/events';
 
 @Injectable({ providedIn: 'root' })
 export class BlockSyncApi {

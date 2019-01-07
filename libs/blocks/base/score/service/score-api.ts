@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { TBlockId } from '../../interface';
-import { blocksDispatchGlobalEvent } from '../../helpers';
 import { IBlockScoreRemove, IBlockScore, IBlockScoreSet } from '../interface';
 import { BLOCK_SCORE_EVENT } from '../const';
+import { blocksDispatchGlobalEvent } from '../../events/events';
 
 @Injectable({ providedIn: 'root' })
 export class BlockScoreApi {

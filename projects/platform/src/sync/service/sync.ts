@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { RtmService } from './rtm';
 import { SyncApiService } from './sync-api';
-import { blocksListenGlobalEvent, blocksDispatchGlobalEvent } from '@skyeng/libs/blocks/base/helpers';
 import { BLOCK_SYNC_EVENTS } from '@skyeng/libs/blocks/base/sync/const';
 import { ISyncData } from '../interface';
 import { shareReplay, delayWhen, map } from 'rxjs/operators';
@@ -12,6 +11,7 @@ import {
 } from '@skyeng/libs/blocks/base/sync/interface';
 import { IBlockAnswer } from '@skyeng/libs/blocks/base/model/interface';
 import { SYNC_EVENS } from '../const';
+import { blocksListenGlobalEvent, blocksDispatchGlobalEvent } from '@skyeng/libs/blocks/base/events/events';
 
 @Injectable({ providedIn: 'root' })
 export class SyncService {

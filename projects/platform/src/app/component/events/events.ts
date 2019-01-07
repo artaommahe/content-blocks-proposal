@@ -1,7 +1,8 @@
 import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
-import { IBlocksEvent, blocksListenAllGlobalEvents, blocksDispatchGlobalEvent } from '@skyeng/libs/blocks/base/helpers';
 import { Observable } from 'rxjs';
 import { scan } from 'rxjs/operators';
+import { IBlocksEvent } from '@skyeng/libs/blocks/base/events/interface';
+import { blocksListenAllGlobalEvents, blocksDispatchGlobalEvent } from '@skyeng/libs/blocks/base/events/events';
 
 @Component({
   selector: 'events',
