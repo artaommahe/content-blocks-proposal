@@ -1,13 +1,13 @@
 import { Component, ChangeDetectionStrategy, OnInit, Input, OnDestroy, ElementRef } from '@angular/core';
 import { BlockApi } from '@skyeng/libs/blocks/base/service/block-api';
 import { BlockService } from '@skyeng/libs/blocks/base/service/block';
-import { TInputData, TInputAnswer } from '../../interface';
+import { TInputData, TInputAnswerData } from '../../interface';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { InputModel } from '../../exercise/model';
-import { handleKeyUsedScore } from '@skyeng/libs/blocks/base/score/handlers/key';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { getBlockConfig } from '@skyeng/libs/blocks/base/config/helpers';
+import { INPUT_SCORE_HANDLERS } from '../../exercise/score-handlers';
 
 interface IAddAnswerParams {
   isKeyUsed?: boolean;
@@ -34,7 +34,7 @@ interface IAddAnswerParams {
 export class InputComponent implements OnInit, OnDestroy {
   @Input() id: string;
 
-  private blockApi: BlockApi<TInputData, TInputAnswer>;
+  private blockApi: BlockApi<TInputData, TInputAnswerData>;
   private value = new BehaviorSubject<string>('');
 
   public model: InputModel;
@@ -104,14 +104,12 @@ export class InputComponent implements OnInit, OnDestroy {
   private init() {
     const blockConfig = getBlockConfig(this.elementRef.nativeElement);
 
-    this.blockApi = this.blockService.createApi<TInputData, TInputAnswer>({
+    this.blockApi = this.blockService.createApi<TInputData, TInputAnswerData>({
       blockId: this.id,
       model: this.model,
       blockConfig,
       scoreStrategyConfig: {
-        handlers: [
-          handleKeyUsedScore,
-        ]
+        handlers: INPUT_SCORE_HANDLERS,
       }
     });
   }

@@ -1,9 +1,7 @@
 import { TScoreHandler } from '../interface';
-import { IBlockAnswer, IBlockAnswerWithKey } from '../../model/interface';
+import { IBlockAnswerWithKey } from '../../model/interface';
 
-type TAnswerWithKey = IBlockAnswer<any> & IBlockAnswerWithKey;
-
-export const handleKeyUsedScore: TScoreHandler<TAnswerWithKey> = (score, answer) => {
+export const keyUsedScoreHandler: TScoreHandler<any, IBlockAnswerWithKey> = (score, answer) => {
   if (!answer.isKeyUsed) {
     return;
   }

@@ -7,6 +7,15 @@ import { TBlockId } from '../../interface';
 import { BlockBaseModel } from '../../model/base';
 import { BlockConfig } from '../../config/config';
 import { IBlockAnswer } from '../../model/interface';
+import { sameScoreHandler } from '../handlers/same';
+import { rightScoreHandler } from '../handlers/right';
+import { wrongScoreHandler } from '../handlers/wrong';
+
+const DEFAULT_SCORE_HANDLERS: TScoreHandler[] = [
+  sameScoreHandler,
+  rightScoreHandler,
+  wrongScoreHandler,
+];
 
 export class BlockBaseScoreStrategy {
   private blockScoreApi: BlockScoreApi;
@@ -18,20 +27,15 @@ export class BlockBaseScoreStrategy {
   private destroyedOptions = { initMethod: this.init, destroyMethod: this.destroy };
 
   constructor(
-    config: IBlockScoreStrategyConfig,
+    config: IBlockScoreStrategyConfig<any, any>,
   ) {
     this.blockScoreApi = config.blockScoreApi;
     this.blockId = config.blockId;
     this.model = config.model;
     this.blockConfig = config.blockConfig;
 
-    // TODO: convert handlers to Observables
-    this.handlers = [
-      this.handleSameScore,
-      ...(config.handlers || []),
-      this.handleCorrectScore,
-      this.handleWrongScore,
-    ];
+    // TODO: (?) convert handlers to Observables
+    this.handlers = config.handlers || DEFAULT_SCORE_HANDLERS;
 
     this.init();
   }
@@ -94,7 +98,7 @@ export class BlockBaseScoreStrategy {
 
   protected handleScore = (score: IBlockScore, answer: IBlockAnswer<any>): IBlockScore => {
     for (const handler of this.handlers) {
-      const newScore = handler(score, answer);
+      const newScore = handler(score, answer, this.model!);
 
       if (newScore) {
         score = newScore;
@@ -103,40 +107,5 @@ export class BlockBaseScoreStrategy {
     }
 
     return score;
-  }
-
-  protected handleSameScore: TScoreHandler = (score, answer) => {
-    if (
-      ((score.right + score.wrong) >= score.maxScore)
-      || (answer.isCorrect === null)
-    ) {
-      return score;
-    }
-
-    return;
-  }
-
-  protected handleCorrectScore: TScoreHandler = (score, answer) => {
-    if (answer.isCorrect !== true) {
-      return;
-    }
-
-    return {
-      ...score,
-      right: score.right + (score.maxScore - score.wrong),
-    };
-  }
-
-  protected handleWrongScore: TScoreHandler = (score, answer) => {
-    if (answer.isCorrect !== false) {
-      return;
-    }
-
-    const correctAnswers = this.model!.getCorrectAnswers();
-
-    return {
-      ...score,
-      wrong: score.wrong + (score.maxScore / (correctAnswers.length - 1)),
-    };
   }
 }

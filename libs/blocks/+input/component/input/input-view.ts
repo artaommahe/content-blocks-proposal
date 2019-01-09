@@ -6,7 +6,7 @@ import { TInputData, TInputAnswer } from '../../interface';
 import { fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { TBlockId } from '@skyeng/libs/blocks/base/interface';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, map } from 'rxjs/operators';
 
 const KEY_AVAILABLE_ANSWERS_COUNT = 3;
 const TYPING_DEBOUNCE_MS = 300;
@@ -37,12 +37,14 @@ export class InputViewComponent implements AfterViewInit, OnDestroy {
 
   public ngAfterViewInit() {
     this.ngZone.runOutsideAngular(() => {
-      fromEvent(this.inputRef.nativeElement, 'input')
+      // TODO: recreate listener on reset
+      fromEvent<KeyboardEvent>(this.inputRef.nativeElement, 'input')
         .pipe(
+          map(event => (<HTMLInputElement> event.target).value),
           debounceTime(TYPING_DEBOUNCE_MS),
           takeUntilDestroyed(this),
         )
-        .subscribe(() => this.typing.next(this.inputRef.nativeElement.value));
+        .subscribe(value => this.typing.next(value));
     });
   }
 

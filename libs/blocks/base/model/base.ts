@@ -4,8 +4,8 @@ import { IBlockAnswer } from './interface';
 
 export class BlockBaseModel<
   TValue,
-  TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>,
-  TAnswerData extends Object = {}
+  TAnswerData extends Object = {},
+  TAnswer extends IBlockAnswer<TValue> & TAnswerData = IBlockAnswer<TValue> & TAnswerData
 > {
   private answers = new BehaviorSubject<TAnswer[]>([]);
   private correctAnswers = new BehaviorSubject<TValue[]>([]);
@@ -38,7 +38,7 @@ export class BlockBaseModel<
     ]);
   }
 
-  public addAnswer(answerPart: Partial<TAnswer> & TAnswerData): void {
+  public addAnswer(answerPart: Partial<TAnswer>): void {
     const currentAnswer = this.getCurrentAnswer();
 
     if (currentAnswer
@@ -79,7 +79,7 @@ export class BlockBaseModel<
       : undefined;
   }
 
-  private createAnswer(answer: Partial<TAnswer> & TAnswerData): TAnswer {
+  private createAnswer(answer: Partial<TAnswer>): TAnswer {
     const isCorrect = answer.isCorrect !== undefined
       ? answer.isCorrect
       : this.isCorrect(answer.value);

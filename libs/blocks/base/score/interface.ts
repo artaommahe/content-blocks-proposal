@@ -9,12 +9,16 @@ export interface IBlockScoreConfig {
   maxScore?: number;
 }
 
-export interface IBlockScoreStrategyConfig {
+export interface IBlockScoreStrategyConfig<
+  TValue,
+  TAnswerData extends Object = {},
+  TAnswer extends IBlockAnswer<TValue> & TAnswerData = IBlockAnswer<TValue> & TAnswerData,
+> {
   blockScoreApi: BlockScoreApi;
   blockId: TBlockId;
   blockConfig: BlockConfig;
-  model?: BlockBaseModel<any, any>;
-  handlers?: TScoreHandler<any>[];
+  model?: BlockBaseModel<TValue, TAnswerData>;
+  handlers?: TScoreHandler<TValue, TAnswerData, TAnswer>[];
 }
 
 export interface IBlockScore {
@@ -34,8 +38,12 @@ export interface IBlockScoreRemove {
   blockId: TBlockId;
 }
 
-// TODO: (?) pass ScoreStrategy as last/first argument
-export type TScoreHandler<TAnswer extends IBlockAnswer<any> = IBlockAnswer<any>> = (
+export type TScoreHandler<
+  TValue = any,
+  TAnswerData extends Object = any,
+  TAnswer extends IBlockAnswer<TValue> & TAnswerData = IBlockAnswer<TValue> & TAnswerData,
+> = (
   score: IBlockScore,
-  answer: TAnswer
+  answer: TAnswer,
+  model: BlockBaseModel<TValue, TAnswerData, TAnswer>,
 ) => IBlockScore | undefined;
