@@ -5,12 +5,13 @@ import { TInputData, TInputAnswer } from '../../interface';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { InputModel } from '../../exercise/model';
 import { handleKeyUsedScore } from '@skyeng/libs/blocks/base/score/handlers/key';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { getBlockConfig } from '@skyeng/libs/blocks/base/config/helpers';
 
-enum INPUT_EVENTS {
-  typing = 'typing',
+interface IAddAnswerParams {
+  isKeyUsed?: boolean;
+  isTyping?: boolean;
 }
 
 @Component({
@@ -18,11 +19,11 @@ enum INPUT_EVENTS {
   template: `
     <ng-content></ng-content>
 
-    <sky-input-view [answers]="model.answers$ | async"
-                    [blockId]="id"
+    <sky-input-view [blockId]="id"
                     [correctAnswers]="model.correctAnswers$ | async"
                     [currentAnswer]="model.currentAnswer$ | async"
                     [value]="value$ | async"
+                    [wrongAnswersCount]="wrongAnswersCount$ | async"
                     (typing)="typing($event)"
                     (useKey)="useKey()"
                     (valueChange)="addAnswer($event)">
@@ -38,6 +39,7 @@ export class InputComponent implements OnInit, OnDestroy {
 
   public model: InputModel;
   public value$ = this.value.asObservable();
+  public wrongAnswersCount$: Observable<number>;
 
   constructor(
     private blockService: BlockService,
@@ -61,6 +63,11 @@ export class InputComponent implements OnInit, OnDestroy {
         takeUntilDestroyed(this),
       )
       .subscribe(this.value);
+
+    this.wrongAnswersCount$ = this.model.answers$.pipe(
+      map(answers => answers.filter(answer => answer.isCorrect === false)),
+      map(answers => answers.length),
+    );
   }
 
   public ngOnDestroy() {
@@ -73,8 +80,11 @@ export class InputComponent implements OnInit, OnDestroy {
     this.model.addCorrectAnswer(correctAnswer);
   }
 
-  public addAnswer(value: TInputData, isKeyUsed = false): void {
-    this.model.addAnswer({ value, isKeyUsed });
+  public addAnswer(value: TInputData, params: IAddAnswerParams = {}): void {
+    const isCorrect = (params.isTyping ? null : undefined);
+    const isKeyUsed = params.isKeyUsed || false;
+
+    this.model.addAnswer({ value, isKeyUsed, isCorrect });
   }
 
   public useKey(): void {
@@ -84,11 +94,11 @@ export class InputComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.addAnswer(correctAnswers[0], true);
+    this.addAnswer(correctAnswers[0], { isKeyUsed: true });
   }
 
   public typing(value: string): void {
-    this.blockApi.sync.sendEvent(INPUT_EVENTS.typing, value);
+    this.addAnswer(value, { isTyping: true });
   }
 
   private init() {
@@ -104,11 +114,5 @@ export class InputComponent implements OnInit, OnDestroy {
         ]
       }
     });
-
-    this.blockApi.sync.onEvent<string>(INPUT_EVENTS.typing)
-      .pipe(
-        takeUntilDestroyed(this),
-      )
-      .subscribe(this.value);
   }
 }

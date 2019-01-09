@@ -41,7 +41,9 @@ export class BlockBaseModel<
   public addAnswer(answerPart: Partial<TAnswer> & TAnswerData): void {
     const currentAnswer = this.getCurrentAnswer();
 
-    if (currentAnswer && (answerPart.value === currentAnswer.value)) {
+    if (currentAnswer
+      && (answerPart.value === currentAnswer.value)
+      && (currentAnswer.isCorrect !== null)) {
       return;
     }
 
@@ -72,15 +74,21 @@ export class BlockBaseModel<
   public getCurrentAnswer(): TAnswer | undefined {
     const answers = this.answers.getValue();
 
-    return answers[0];
+    return answers.length
+      ? answers[answers.length - 1]
+      : undefined;
   }
 
   private createAnswer(answer: Partial<TAnswer> & TAnswerData): TAnswer {
+    const isCorrect = answer.isCorrect !== undefined
+      ? answer.isCorrect
+      : this.isCorrect(answer.value);
+
     return <TAnswer> {
-      createdAt: Date.now(),
-      isCorrect: this.isCorrect(answer.value),
       // https://github.com/Microsoft/TypeScript/issues/10727
-      ...((<Object> answer) || {})
+      ...((<Object> answer) || {}),
+      createdAt: Date.now(),
+      isCorrect,
     };
   }
 

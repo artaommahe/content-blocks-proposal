@@ -6,8 +6,10 @@ import { TInputData, TInputAnswer } from '../../interface';
 import { fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { TBlockId } from '@skyeng/libs/blocks/base/interface';
+import { debounceTime } from 'rxjs/operators';
 
 const KEY_AVAILABLE_ANSWERS_COUNT = 3;
+const TYPING_DEBOUNCE_MS = 300;
 
 @Component({
   selector: 'sky-input-view',
@@ -16,11 +18,11 @@ const KEY_AVAILABLE_ANSWERS_COUNT = 3;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InputViewComponent implements AfterViewInit, OnDestroy {
-  @Input() answers: TInputAnswer[];
   @Input() blockId: TBlockId;
   @Input() correctAnswers: string[];
   @Input() currentAnswer: TInputAnswer | undefined;
   @Input() value: TInputAnswer;
+  @Input() wrongAnswersCount: number;
 
   @Output() typing = new EventEmitter<string>();
   @Output() useKey = new EventEmitter<void>();
@@ -37,6 +39,7 @@ export class InputViewComponent implements AfterViewInit, OnDestroy {
     this.ngZone.runOutsideAngular(() => {
       fromEvent(this.inputRef.nativeElement, 'input')
         .pipe(
+          debounceTime(TYPING_DEBOUNCE_MS),
           takeUntilDestroyed(this),
         )
         .subscribe(() => this.typing.next(this.inputRef.nativeElement.value));
@@ -47,7 +50,7 @@ export class InputViewComponent implements AfterViewInit, OnDestroy {
   }
 
   public canUseKey(): boolean {
-    return !this.isCorrect() && (this.answers.length >= KEY_AVAILABLE_ANSWERS_COUNT);
+    return !this.isCorrect() && (this.wrongAnswersCount >= KEY_AVAILABLE_ANSWERS_COUNT);
   }
 
   public isCorrect(): boolean {
