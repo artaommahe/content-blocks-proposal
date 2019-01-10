@@ -2,7 +2,7 @@ import {
   Component, ChangeDetectionStrategy, Input, Output, EventEmitter,
   ViewChild, ElementRef, AfterViewInit, NgZone, OnDestroy,
 } from '@angular/core';
-import { TInputData, TInputAnswer } from '../../interface';
+import { TInputValue, TInputAnswer } from '../../interface';
 import { fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { TBlockId } from '@skyeng/libs/blocks/base/interface';
@@ -26,7 +26,7 @@ export class InputViewComponent implements AfterViewInit, OnDestroy {
 
   @Output() typing = new EventEmitter<string>();
   @Output() useKey = new EventEmitter<void>();
-  @Output() valueChange = new EventEmitter<TInputData>();
+  @Output() valueChange = new EventEmitter<TInputValue>();
 
   @ViewChild('input') inputRef: ElementRef<HTMLInputElement>;
 

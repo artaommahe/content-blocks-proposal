@@ -1,5 +1,8 @@
-import { IBlockAnswer, IBlockAnswerWithKey } from '../base/model/interface';
+import { IBlockAnswer } from '../base/model/interface';
 
-export type TInputData = string;
-export type TInputAnswerData = IBlockAnswerWithKey;
-export type TInputAnswer = IBlockAnswer<TInputData> & TInputAnswerData;
+export interface IInputAnswerData {
+  isKeyUsed?: boolean;
+}
+
+export type TInputValue = string;
+export type TInputAnswer = IBlockAnswer<TInputValue> & IInputAnswerData;

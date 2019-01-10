@@ -8,13 +8,9 @@ import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destro
 import { BlockConfig } from '../../config/config';
 import { IBlockAnswer } from '../../model/interface';
 
-export class BlockBaseSyncStrategy<
-  TValue,
-  TAnswerData extends Object = {},
-  TAnswer extends IBlockAnswer<TValue> & TAnswerData = IBlockAnswer<TValue> & TAnswerData
-> {
+export class BlockBaseSyncStrategy<TValue, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>> {
   private blockSyncApi: BlockSyncApi;
-  private model: BlockBaseModel<TValue, TAnswerData, TAnswer> | undefined;
+  private model: BlockBaseModel<TValue, TAnswer> | undefined;
   private blockId: TBlockId;
   private blockConfig: BlockConfig;
 
@@ -97,7 +93,7 @@ export class BlockBaseSyncStrategy<
     return !!this.blockConfig.get([ 'sync', 'enabled' ]);
   }
 
-  private bindToModel(model: BlockBaseModel<TValue, TAnswerData, TAnswer>): void {
+  private bindToModel(model: BlockBaseModel<TValue, TAnswer>): void {
     // sync new value to partners/storage
     model.newAnswer$
       .pipe(

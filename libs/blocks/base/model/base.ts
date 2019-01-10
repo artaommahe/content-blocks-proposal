@@ -2,11 +2,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { map, skip, debounceTime, take, mapTo } from 'rxjs/operators';
 import { IBlockAnswer } from './interface';
 
-export class BlockBaseModel<
-  TValue,
-  TAnswerData extends Object = {},
-  TAnswer extends IBlockAnswer<TValue> & TAnswerData = IBlockAnswer<TValue> & TAnswerData
-> {
+export class BlockBaseModel<TValue, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>> {
   private answers = new BehaviorSubject<TAnswer[]>([]);
   private correctAnswers = new BehaviorSubject<TValue[]>([]);
   private newAnswer = new Subject<TAnswer>();

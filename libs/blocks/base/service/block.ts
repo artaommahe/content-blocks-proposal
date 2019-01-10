@@ -16,12 +16,8 @@ export class BlockService {
   ) {
   }
 
-  public createApi<
-    TValue = void,
-    TAnswerData extends Object = {},
-    TAnswer extends IBlockAnswer<TValue> & TAnswerData = IBlockAnswer<TValue> & TAnswerData
-  >(
-    config: IBlockApiConfig<TValue, TAnswerData, TAnswer>
+  public createApi<TValue = void, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>>(
+    config: IBlockApiConfig<TValue, TAnswer>
   ): BlockApi<TValue, TAnswer> {
     config.blockId = config.blockId || this.createBlockId();
     config.blockConfig = config.blockConfig || new BlockConfig;
@@ -35,14 +31,14 @@ export class BlockService {
       ...(config.scoreStrategyConfig || {})
     });
 
-    const sync = new BlockBaseSyncStrategy<TValue, TAnswerData, TAnswer>({
+    const sync = new BlockBaseSyncStrategy<TValue, TAnswer>({
       blockSyncApi: this.blockSyncApi,
       blockId: config.blockId,
       model: config.model,
       blockConfig: config.blockConfig,
     });
 
-    return new BlockApi<TValue, TAnswerData, TAnswer>(score, sync);
+    return new BlockApi<TValue, TAnswer>(score, sync);
   }
 
   private createBlockId(): TBlockId {

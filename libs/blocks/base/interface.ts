@@ -11,13 +11,9 @@ export interface IBlockConfig {
   sync?: IBlockSyncConfig;
 }
 
-export interface IBlockApiConfig<
-  TValue,
-  TAnswerData extends Object = {},
-  TAnswer extends IBlockAnswer<TValue> & TAnswerData = IBlockAnswer<TValue> & TAnswerData
-> {
+export interface IBlockApiConfig<TValue, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>> {
   blockId?: TBlockId;
-  model?: BlockBaseModel<TValue, TAnswerData, TAnswer>;
+  model?: BlockBaseModel<TValue, TAnswer>;
   blockConfig?: BlockConfig;
-  scoreStrategyConfig?: Partial<IBlockScoreStrategyConfig<TValue, TAnswerData, TAnswer>>;
+  scoreStrategyConfig?: Partial<IBlockScoreStrategyConfig<TValue, TAnswer>>;
 }

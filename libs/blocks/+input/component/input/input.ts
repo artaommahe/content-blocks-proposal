@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, OnInit, Input, OnDestroy, ElementRef } from '@angular/core';
 import { BlockApi } from '@skyeng/libs/blocks/base/service/block-api';
 import { BlockService } from '@skyeng/libs/blocks/base/service/block';
-import { TInputData, TInputAnswerData } from '../../interface';
+import { TInputValue, TInputAnswer } from '../../interface';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { InputModel } from '../../exercise/model';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -34,7 +34,7 @@ interface IAddAnswerParams {
 export class InputComponent implements OnInit, OnDestroy {
   @Input() id: string;
 
-  private blockApi: BlockApi<TInputData, TInputAnswerData>;
+  private blockApi: BlockApi<TInputValue, TInputAnswer>;
   private value = new BehaviorSubject<string>('');
 
   public model: InputModel;
@@ -80,7 +80,11 @@ export class InputComponent implements OnInit, OnDestroy {
     this.model.addCorrectAnswer(correctAnswer);
   }
 
-  public addAnswer(value: TInputData, params: IAddAnswerParams = {}): void {
+  public addAnswer(value: TInputValue, params: IAddAnswerParams = {}): void {
+    if (!value) {
+      return;
+    }
+
     const isCorrect = (params.isTyping ? null : undefined);
     const isKeyUsed = params.isKeyUsed || false;
 
@@ -104,7 +108,7 @@ export class InputComponent implements OnInit, OnDestroy {
   private init() {
     const blockConfig = getBlockConfig(this.elementRef.nativeElement);
 
-    this.blockApi = this.blockService.createApi<TInputData, TInputAnswerData>({
+    this.blockApi = this.blockService.createApi<TInputValue, TInputAnswer>({
       blockId: this.id,
       model: this.model,
       blockConfig,

@@ -1,5 +1,5 @@
 import { BlockBaseModel } from '../../base/model/base';
-import { TInputData, TInputAnswerData } from '../interface';
+import { TInputValue, TInputAnswer } from '../interface';
 
-export class InputModel extends BlockBaseModel<TInputData, TInputAnswerData> {
+export class InputModel extends BlockBaseModel<TInputValue, TInputAnswer> {
 }
