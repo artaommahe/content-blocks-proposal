@@ -1,6 +1,6 @@
 import { MAX_SCORE_DEFAULT } from '../const';
 import { IBlockScore, IBlockScoreStrategyConfig, TScoreHandler } from '../interface';
-import { scan, map, pairwise, startWith, concatAll, debounceTime, filter, switchMap } from 'rxjs/operators';
+import { scan, map, pairwise, startWith, concatAll, debounceTime, switchMap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { BlockScoreApi } from '../service/score-api';
 import { TBlockId } from '../../interface';
@@ -65,10 +65,10 @@ export class BlockBaseScoreStrategy {
       debounceTime(0),
     );
 
-    model.answers$
+    // reset score on model reset
+    model.reset$
       .pipe(
-        // reset score on empty answers
-        filter(answers => !answers.length),
+        startWith(null),
         switchMap(() => score$),
         takeUntilDestroyed(this, this.destroyedOptions),
       )

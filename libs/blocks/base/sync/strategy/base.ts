@@ -124,7 +124,7 @@ export class BlockBaseSyncStrategy<TValue, TAnswer extends IBlockAnswer<TValue> 
       .pipe(
         takeUntilDestroyed(this, this.destroyedOptions),
       )
-      .subscribe(() => model.setAnswers(null));
+      .subscribe(() => model.reset());
   }
 
   private valueIsNotFromSync(): boolean {

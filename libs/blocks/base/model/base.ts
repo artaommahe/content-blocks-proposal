@@ -1,21 +1,34 @@
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, skip, debounceTime, take, mapTo } from 'rxjs/operators';
 import { IBlockAnswer } from './interface';
+import { Store } from '@skyeng/libs/store/store';
+
+interface IStoreState<TValue, TAnswer> {
+  answers: TAnswer[];
+  correctAnswers: TValue[];
+}
+
+interface IStoreEvents<TAnswer> {
+  newAnswer: TAnswer;
+  reset: void;
+}
 
 export class BlockBaseModel<TValue, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>> {
-  private answers = new BehaviorSubject<TAnswer[]>([]);
-  private correctAnswers = new BehaviorSubject<TValue[]>([]);
-  private newAnswer = new Subject<TAnswer>();
+  protected store = new Store<IStoreState<TValue, TAnswer>, IStoreEvents<TAnswer>>({
+    answers: [],
+    correctAnswers: [],
+  });
 
-  public answers$ = this.answers.asObservable();
-  public correctAnswers$ = this.correctAnswers.asObservable();
+  public answers$ = this.store.select([ 'answers' ]);
+  public correctAnswers$ = this.store.select([ 'correctAnswers' ]);
   public correctAnswersInited$: Observable<void>;
   public currentAnswer$: Observable<TAnswer | undefined>;
-  public newAnswer$ = this.newAnswer.asObservable();
+  public newAnswer$ = this.store.on('newAnswer');
+  public reset$ = this.store.on('reset');
 
   constructor(
   ) {
-    this.currentAnswer$ = this.answers.asObservable().pipe(
+    this.currentAnswer$ = this.answers$.pipe(
       map(answers => answers[answers.length - 1]),
     );
 
@@ -28,10 +41,7 @@ export class BlockBaseModel<TValue, TAnswer extends IBlockAnswer<TValue> = IBloc
   }
 
   public addCorrectAnswer(correctAnswer: TValue): void {
-    this.correctAnswers.next([
-      ...this.correctAnswers.getValue(),
-      correctAnswer,
-    ]);
+    this.storeAddCorrectAnswer(correctAnswer);
   }
 
   public addAnswer(answerPart: Partial<TAnswer>): void {
@@ -39,43 +49,43 @@ export class BlockBaseModel<TValue, TAnswer extends IBlockAnswer<TValue> = IBloc
 
     if (currentAnswer
       && (answerPart.value === currentAnswer.value)
-      && (currentAnswer.isCorrect !== null)) {
+      && (currentAnswer.isCorrect !== null)
+    ) {
       return;
     }
 
     const answer = this.createAnswer(answerPart);
 
-    this.answers.next([
-      ...this.answers.getValue(),
-      answer,
-    ]);
+    this.storeAddAnswer(answer);
 
-    this.newAnswer.next(answer);
+    this.store.fire('newAnswer', answer);
   }
 
   public setAnswers(newAnswers: TAnswer[] | null): void {
-    const answers = this.answers.getValue();
+    newAnswers = newAnswers || [];
 
-    if ((!newAnswers || !newAnswers.length) && !answers.length) {
-      return;
-    }
+    this.storeSetAnswers(newAnswers);
+  }
 
-    this.answers.next(newAnswers || []);
+  public reset(): void {
+    this.setAnswers([]);
+
+    this.store.fire('reset');
   }
 
   public getCorrectAnswers(): TValue[] {
-    return this.correctAnswers.getValue();
+    return this.store.get([ 'correctAnswers' ]);
   }
 
   public getCurrentAnswer(): TAnswer | undefined {
-    const answers = this.answers.getValue();
+    const answers = this.store.get([ 'answers' ]);
 
     return answers.length
       ? answers[answers.length - 1]
       : undefined;
   }
 
-  private createAnswer(answer: Partial<TAnswer>): TAnswer {
+  protected createAnswer(answer: Partial<TAnswer>): TAnswer {
     const isCorrect = answer.isCorrect !== undefined
       ? answer.isCorrect
       : this.isCorrect(answer.value);
@@ -88,9 +98,33 @@ export class BlockBaseModel<TValue, TAnswer extends IBlockAnswer<TValue> = IBloc
     };
   }
 
-  private isCorrect(value?: TValue): boolean {
+  protected isCorrect(value?: TValue): boolean {
     const correctAnswers = this.getCorrectAnswers();
 
     return !!value && correctAnswers.includes(value);
+  }
+
+  protected storeAddCorrectAnswer(correctAnswer: TValue): void {
+    this.store.update(state => ({
+      ...state,
+      correctAnswers: [
+        ...state.correctAnswers,
+        correctAnswer,
+      ],
+    }));
+  }
+
+  protected storeSetAnswers(answers: TAnswer[]): void {
+    this.store.update(state => ({ ...state, answers }));
+  }
+
+  protected storeAddAnswer(answer: TAnswer): void {
+    this.store.update(state => ({
+      ...state,
+      answers: [
+        ...state.answers,
+        answer,
+      ],
+    }));
   }
 }
