@@ -22,8 +22,11 @@ export class BlockService {
     config.blockId = config.blockId || this.createBlockId();
     config.blockConfig = config.blockConfig || new BlockConfig;
 
+    const ScoreStrategy = config.scoreStrategy || BlockBaseScoreStrategy;
+    const SyncStrategy = config.syncStrategy || BlockBaseSyncStrategy;
+
     // TODO: (?) move entities init to BlockApi constructor
-    const score = new BlockBaseScoreStrategy({
+    const score = new ScoreStrategy({
       blockScoreApi: this.blockScoreApi,
       blockId: config.blockId,
       model: config.model,
@@ -31,7 +34,7 @@ export class BlockService {
       ...(config.scoreStrategyConfig || {})
     });
 
-    const sync = new BlockBaseSyncStrategy<TValue, TAnswer>({
+    const sync = new SyncStrategy<TValue, TAnswer>({
       blockSyncApi: this.blockSyncApi,
       blockId: config.blockId,
       model: config.model,

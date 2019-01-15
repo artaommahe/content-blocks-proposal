@@ -7,7 +7,7 @@ import { InputModel } from '../../exercise/model';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { getBlockConfig } from '@skyeng/libs/blocks/base/config/helpers';
-import { INPUT_SCORE_HANDLERS } from '../../exercise/score-handlers';
+import { InputScoreStrategy } from '../../exercise/score';
 
 interface IAddAnswerParams {
   isKeyUsed?: boolean;
@@ -112,9 +112,7 @@ export class InputComponent implements OnInit, OnDestroy {
       blockId: this.id,
       model: this.model,
       blockConfig,
-      scoreStrategyConfig: {
-        handlers: INPUT_SCORE_HANDLERS,
-      }
+      scoreStrategy: InputScoreStrategy,
     });
   }
 }

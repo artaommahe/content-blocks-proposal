@@ -7,24 +7,14 @@ import { TBlockId } from '../../interface';
 import { BlockBaseModel } from '../../model/base';
 import { BlockConfig } from '../../config/config';
 import { IBlockAnswer } from '../../model/interface';
-import { sameScoreHandler } from '../handlers/same';
-import { rightScoreHandler } from '../handlers/right';
-import { wrongScoreHandler } from '../handlers/wrong';
-
-const DEFAULT_SCORE_HANDLERS: TScoreHandler[] = [
-  sameScoreHandler,
-  rightScoreHandler,
-  wrongScoreHandler,
-];
 
 export class BlockBaseScoreStrategy {
-  private blockScoreApi: BlockScoreApi;
-  private blockId: TBlockId;
-  private model: BlockBaseModel<any> | undefined;
-  private blockConfig: BlockConfig;
-  private handlers: TScoreHandler[];
-
-  private destroyedOptions = { initMethod: this.init, destroyMethod: this.destroy };
+  protected blockScoreApi: BlockScoreApi;
+  protected blockId: TBlockId;
+  protected model: BlockBaseModel<any> | undefined;
+  protected blockConfig: BlockConfig;
+  protected handlers: TScoreHandler[];
+  protected destroyedOptions = { initMethod: this.init, destroyMethod: this.destroy };
 
   constructor(
     config: IBlockScoreStrategyConfig<any, any>,
@@ -33,9 +23,6 @@ export class BlockBaseScoreStrategy {
     this.blockId = config.blockId;
     this.model = config.model;
     this.blockConfig = config.blockConfig;
-
-    // TODO: (?) convert handlers to Observables
-    this.handlers = config.handlers || DEFAULT_SCORE_HANDLERS;
 
     this.init();
   }
@@ -52,17 +39,17 @@ export class BlockBaseScoreStrategy {
     this.blockScoreApi.set(this.blockId, score);
   }
 
-  private init(): void {
+  protected init(): void {
     if (this.model) {
       this.bindToModel(this.model);
     }
   }
 
-  private isEnabled(): boolean {
+  protected isEnabled(): boolean {
     return !!this.blockConfig.get([ 'score', 'enabled' ]);
   }
 
-  private bindToModel(model: BlockBaseModel<any>): void {
+  protected bindToModel(model: BlockBaseModel<any>): void {
     const startingScore = this.getStartingScore();
 
     const score$ = model.answers$.pipe(
@@ -88,7 +75,7 @@ export class BlockBaseScoreStrategy {
       .subscribe(score => this.set(score));
   }
 
-  private getStartingScore(): IBlockScore {
+  protected getStartingScore(): IBlockScore {
     return {
       right: 0,
       wrong: 0,

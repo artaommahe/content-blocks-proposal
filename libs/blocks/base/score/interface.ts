@@ -14,7 +14,6 @@ export interface IBlockScoreStrategyConfig<TValue, TAnswer extends IBlockAnswer<
   blockId: TBlockId;
   blockConfig: BlockConfig;
   model?: BlockBaseModel<TValue, TAnswer>;
-  handlers?: TScoreHandler<TValue, TAnswer>[];
 }
 
 export interface IBlockScore {

@@ -3,6 +3,8 @@ import { IBlockSyncConfig } from './sync/interface';
 import { BlockBaseModel } from './model/base';
 import { BlockConfig } from './config/config';
 import { IBlockAnswer } from './model/interface';
+import { BlockBaseScoreStrategy } from './score/strategy/base';
+import { BlockBaseSyncStrategy } from './sync/strategy/base';
 
 export type TBlockId = string;
 
@@ -15,5 +17,7 @@ export interface IBlockApiConfig<TValue, TAnswer extends IBlockAnswer<TValue> = 
   blockId?: TBlockId;
   model?: BlockBaseModel<TValue, TAnswer>;
   blockConfig?: BlockConfig;
+  scoreStrategy?: typeof BlockBaseScoreStrategy;
   scoreStrategyConfig?: Partial<IBlockScoreStrategyConfig<TValue, TAnswer>>;
+  syncStrategy?: typeof BlockBaseSyncStrategy;
 }
