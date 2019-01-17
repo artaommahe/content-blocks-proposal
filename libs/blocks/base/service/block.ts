@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BlockApi } from './block-api';
-import { TBlockId, IBlockApiConfig } from '../interface';
+import { BaseBlockApi } from './block-api';
+import { TBlockId, IBlockApiConfig, ConstructorType } from '../interface';
 import { BlockBaseScoreStrategy } from '../score/strategy/base';
 import { BlockScoreApi } from '../score/service/score-api';
 import { BlockBaseSyncStrategy } from '../sync/strategy/base';
@@ -16,9 +16,13 @@ export class BlockService {
   ) {
   }
 
-  public createApi<TValue = void, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>>(
-    config: IBlockApiConfig<TValue, TAnswer>
-  ): BlockApi<TValue, TAnswer> {
+  public createApi<
+    TValue = void,
+    TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>,
+    TBlockApi extends BaseBlockApi<TValue, TAnswer> = BaseBlockApi<TValue, TAnswer>,
+  >(
+    config: IBlockApiConfig<TValue, TAnswer, TBlockApi>
+  ): TBlockApi {
     config.blockId = config.blockId || this.createBlockId();
     config.blockConfig = config.blockConfig || new BlockConfig;
 
@@ -41,7 +45,9 @@ export class BlockService {
       blockConfig: config.blockConfig,
     });
 
-    return new BlockApi<TValue, TAnswer>(score, sync);
+    const BlockApi = config.api || (<ConstructorType<TBlockApi>> BaseBlockApi);
+
+    return new BlockApi(config.model, score, sync);
   }
 
   private createBlockId(): TBlockId {

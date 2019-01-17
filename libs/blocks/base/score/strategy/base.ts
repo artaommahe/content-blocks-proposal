@@ -13,7 +13,7 @@ export class BlockBaseScoreStrategy {
   protected blockId: TBlockId;
   protected model: BlockBaseModel<any> | undefined;
   protected blockConfig: BlockConfig;
-  protected handlers: TScoreHandler[];
+  protected handlers: TScoreHandler[] = [];
   protected destroyedOptions = { initMethod: this.init, destroyMethod: this.destroy };
 
   constructor(

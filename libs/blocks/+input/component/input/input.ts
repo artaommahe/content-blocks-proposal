@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, OnInit, Input, OnDestroy, ElementRef } from '@angular/core';
-import { BlockApi } from '@skyeng/libs/blocks/base/service/block-api';
+import { BaseBlockApi } from '@skyeng/libs/blocks/base/service/block-api';
 import { BlockService } from '@skyeng/libs/blocks/base/service/block';
 import { TInputValue, TInputAnswer } from '../../interface';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
@@ -34,7 +34,7 @@ interface IAddAnswerParams {
 export class InputComponent implements OnInit, OnDestroy {
   @Input() id: string;
 
-  private blockApi: BlockApi<TInputValue, TInputAnswer>;
+  private blockApi: BaseBlockApi<TInputValue, TInputAnswer>;
   private value = new BehaviorSubject<string>('');
 
   public model: InputModel;
