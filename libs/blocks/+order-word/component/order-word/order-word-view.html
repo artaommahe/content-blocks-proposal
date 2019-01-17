@@ -1,0 +1,22 @@
+<div class="root">
+  <div class="items">
+    <sky-order-word-answer-item *ngFor="
+                                  let item of items;
+                                  trackBy: itemTrack;
+                                  let isLast = last;
+                                  let isFirst = first;
+                                  let index = index;
+                                "
+                                [isLast]="isLast"
+                                [isFirst]="isFirst"
+                                [item]="item"
+                                (moveLeft)="moveLeft(index)"
+                                (moveRight)="moveRight(index)">
+    </sky-order-word-answer-item>
+  </div>
+
+  <button class="set"
+          (click)="onSetClick()">
+    set
+  </button>
+</div>

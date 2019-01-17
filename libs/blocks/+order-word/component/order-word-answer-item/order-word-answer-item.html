@@ -1,0 +1,21 @@
+<div class="root">
+  <div class="move">
+    <button *ngIf="!isFirst && !isCorrect()"
+            (click)="onMoveLeftClick()">
+      <
+    </button>
+  </div>
+
+  <div class="content"
+       [class.-correct]="isCorrect()"
+       [class.-wrong]="isWrong()">
+    <ng-container *ngTemplateOutlet="item.templateRef"></ng-container>
+  </div>
+
+  <div class="move">
+    <button *ngIf="!isLast && !isCorrect()"
+            (click)="onMoveRightClick()">
+      >
+    </button>
+  </div>
+</div>

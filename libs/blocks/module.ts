@@ -7,11 +7,14 @@ import { BlocksBaseModule } from './base/module';
 import { BASE_BLOCKS } from './base/blocks';
 import { SCORE_BLOCKS } from './base/score/blocks';
 import { BlocksScoreModule } from './base/score/module';
+import { BlocksOrderWordModule } from './+order-word/module';
+import { ORDER_WORD_BLOCKS } from './+order-word/blocks';
 
 const CUSTOM_ELEMENTS = [
   ...BASE_BLOCKS,
   ...INPUT_BLOCKS,
   ...SCORE_BLOCKS,
+  ...ORDER_WORD_BLOCKS,
 ];
 
 @NgModule({
@@ -20,6 +23,7 @@ const CUSTOM_ELEMENTS = [
     BlocksBaseModule,
     BlocksInputModule,
     BlocksScoreModule,
+    BlocksOrderWordModule,
   ]
 })
 export class BlocksModule {

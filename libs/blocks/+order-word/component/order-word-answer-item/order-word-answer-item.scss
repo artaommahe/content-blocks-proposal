@@ -1,0 +1,27 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  padding: 0 8px;
+}
+
+.move {
+  height: 20px;
+  font-weight: 600;
+  opacity: 0.32;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.content {
+  padding: 5px 0;
+
+  &.-correct {
+    color: #55a900;
+  }
+
+  &.-wrong {
+    color: #fe4f44;
+  }
+}
