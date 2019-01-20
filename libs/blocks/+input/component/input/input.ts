@@ -8,6 +8,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { getBlockConfig } from '@skyeng/libs/blocks/base/config/helpers';
 import { InputScoreStrategy } from '../../exercise/score';
+import { BlockConfig } from '@skyeng/libs/blocks/base/config/config';
 
 interface IAddAnswerParams {
   isKeyUsed?: boolean;
@@ -22,6 +23,7 @@ interface IAddAnswerParams {
     <sky-input-view [blockId]="id"
                     [correctAnswers]="model.correctAnswers$ | async"
                     [currentAnswer]="model.currentAnswer$ | async"
+                    [isMobile]="isMobile$ | async"
                     [value]="value$ | async"
                     [wrongAnswersCount]="wrongAnswersCount$ | async"
                     (typing)="typing($event)"
@@ -35,8 +37,10 @@ export class InputComponent implements OnInit, OnDestroy {
   @Input() id: string;
 
   private blockApi: BaseBlockApi<TInputValue, TInputAnswer>;
+  private blockConfig: BlockConfig;
   private value = new BehaviorSubject<string>('');
 
+  public isMobile$: Observable<boolean>;
   public model: InputModel;
   public value$ = this.value.asObservable();
   public wrongAnswersCount$: Observable<number>;
@@ -48,9 +52,12 @@ export class InputComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit() {
+    this.blockConfig = getBlockConfig(this.elementRef.nativeElement);
     this.model = new InputModel();
 
-    // wait for correct answers to init
+    this.isMobile$ = this.blockConfig.select([ 'isMobile' ], false);
+
+    // wait for correct answers to init api
     this.model.correctAnswersInited$
       .pipe(
         takeUntilDestroyed(this),
@@ -106,12 +113,10 @@ export class InputComponent implements OnInit, OnDestroy {
   }
 
   private init() {
-    const blockConfig = getBlockConfig(this.elementRef.nativeElement);
-
     this.blockApi = this.blockService.createApi<TInputValue, TInputAnswer>({
       blockId: this.id,
       model: this.model,
-      blockConfig,
+      blockConfig: this.blockConfig,
       scoreStrategy: InputScoreStrategy,
     });
   }

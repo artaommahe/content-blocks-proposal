@@ -21,6 +21,7 @@ export class InputViewComponent implements AfterViewInit, OnDestroy {
   @Input() blockId: TBlockId;
   @Input() correctAnswers: string[];
   @Input() currentAnswer: TInputAnswer | undefined;
+  @Input() isMobile: boolean;
   @Input() value: TInputAnswer;
   @Input() wrongAnswersCount: number;
 

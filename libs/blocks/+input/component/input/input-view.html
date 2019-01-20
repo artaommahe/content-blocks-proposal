@@ -1,6 +1,7 @@
 <div class="root"
      [class.-correct]="isCorrect()"
-     [class.-wrong]="isWrong()">
+     [class.-wrong]="isWrong()"
+     [class.-mobile]="isMobile">
   <ng-container *ngIf="!isCorrect()">
     <div class="input-container">
       <input class="input"

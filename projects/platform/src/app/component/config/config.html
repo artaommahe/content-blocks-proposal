@@ -20,4 +20,14 @@
       enabled
     </label>
   </div>
+
+  <div class="field">
+    Misc |
+    <label>
+      <input type="checkbox"
+             [checked]="config.isMobile"
+             (change)="setField({ isMobile: $event.target.checked })">
+      isMobile
+    </label>
+  </div>
 </div>

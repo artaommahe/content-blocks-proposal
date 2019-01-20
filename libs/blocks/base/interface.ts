@@ -12,6 +12,7 @@ export type TBlockId = string;
 export interface IBlockConfig {
   score?: IBlockScoreConfig;
   sync?: IBlockSyncConfig;
+  isMobile?: boolean;
 }
 
 // uglyhack for class constructor type
