@@ -1,6 +1,6 @@
 import { TScoreHandler } from '../interface';
 
-export const rightScoreHandler: TScoreHandler = (score, answer) => {
+export const rightScoreHandler: TScoreHandler = ({ score, answer }) => {
   if (answer.isCorrect !== true) {
     return;
   }

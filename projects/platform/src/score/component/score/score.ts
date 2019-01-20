@@ -8,7 +8,7 @@ import { map } from 'rxjs/operators';
   template: `
     <score-view [right]="right$ | async"
                 [wrong]="wrong$ | async"
-                [remain]="remain$ | async">
+                [remaining]="remaining$ | async">
     </score-view>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,7 +16,7 @@ import { map } from 'rxjs/operators';
 export class ScoreComponent implements OnInit {
   public right$: Observable<number>;
   public wrong$: Observable<number>;
-  public remain$: Observable<number>;
+  public remaining$: Observable<number>;
 
   constructor(
     private scoreService: ScoreService,
@@ -32,8 +32,8 @@ export class ScoreComponent implements OnInit {
       map(({ wrong }) => wrong),
     );
 
-    this.remain$ = this.scoreService.score$.pipe(
-      map(({ total, right, wrong }) => (total - right - wrong)),
+    this.remaining$ = this.scoreService.score$.pipe(
+      map(({ total, right, wrong }) => +(total - right - wrong).toFixed(2)),
     );
   }
 }

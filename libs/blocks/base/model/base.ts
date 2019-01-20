@@ -85,6 +85,10 @@ export class BlockBaseModel<TValue, TAnswer extends IBlockAnswer<TValue> = IBloc
       : undefined;
   }
 
+  public getAnswers(): TAnswer[] {
+    return this.store.get([ 'answers' ]);
+  }
+
   protected createAnswer(answer: Partial<TAnswer>): TAnswer {
     const isCorrect = answer.isCorrect !== undefined
       ? answer.isCorrect

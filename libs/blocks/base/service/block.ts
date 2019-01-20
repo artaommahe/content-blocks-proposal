@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { BaseBlockApi } from './block-api';
 import { TBlockId, IBlockApiConfig, ConstructorType } from '../interface';
-import { BlockBaseScoreStrategy } from '../score/strategy/base';
 import { BlockScoreApi } from '../score/service/score-api';
 import { BlockBaseSyncStrategy } from '../sync/strategy/base';
 import { BlockSyncApi } from '../sync/service/sync-api';
 import { BlockConfig } from '../config/config';
 import { IBlockAnswer } from '../model/interface';
+import { BlockSimpleScoreStrategy } from '../score/strategy/simple';
 
 @Injectable({ providedIn: 'root' })
 export class BlockService {
@@ -26,7 +26,7 @@ export class BlockService {
     config.blockId = config.blockId || this.createBlockId();
     config.blockConfig = config.blockConfig || new BlockConfig;
 
-    const ScoreStrategy = config.scoreStrategy || BlockBaseScoreStrategy;
+    const ScoreStrategy = config.scoreStrategy || BlockSimpleScoreStrategy;
     const SyncStrategy = config.syncStrategy || BlockBaseSyncStrategy;
 
     // TODO: (?) move entities init to BlockApi constructor

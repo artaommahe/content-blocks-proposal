@@ -9,5 +9,5 @@ import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 export class ScoreViewComponent {
   @Input() right: number;
   @Input() wrong: number;
-  @Input() remain: number;
+  @Input() remaining: number;
 }

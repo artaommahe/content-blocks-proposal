@@ -1,7 +1,7 @@
 import { TScoreHandler } from '../../base/score/interface';
 import { TInputValue, TInputAnswer } from '../interface';
 
-export const inputWrongScoreHandler: TScoreHandler<TInputValue, TInputAnswer> = (score, answer, model) => {
+export const inputWrongScoreHandler: TScoreHandler<TInputValue, TInputAnswer> = ({ score, answer, model }) => {
   if (answer.isCorrect !== false) {
     return;
   }

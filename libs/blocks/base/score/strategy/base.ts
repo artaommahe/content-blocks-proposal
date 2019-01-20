@@ -85,7 +85,11 @@ export class BlockBaseScoreStrategy {
 
   protected handleScore = (score: IBlockScore, answer: IBlockAnswer<any>): IBlockScore => {
     for (const handler of this.handlers) {
-      const newScore = handler(score, answer, this.model!);
+      const newScore = handler({
+        score,
+        answer,
+        model: this.model!
+      });
 
       if (newScore) {
         score = newScore;

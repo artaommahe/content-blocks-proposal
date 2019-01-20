@@ -34,7 +34,9 @@ export interface IBlockScoreRemove {
 }
 
 export type TScoreHandler<TValue = any, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>> = (
-  score: IBlockScore,
-  answer: TAnswer,
-  model: BlockBaseModel<TValue, TAnswer>,
+  params: {
+    score: IBlockScore;
+    answer: TAnswer;
+    model: BlockBaseModel<TValue, TAnswer>;
+  }
 ) => IBlockScore | undefined;

@@ -1,18 +1,21 @@
 import { Component, ChangeDetectionStrategy, Input, OnInit, OnDestroy, ElementRef } from '@angular/core';
-import { IOrderWordItem, TOrderWordValue, IOrderWordFormattedItem, TOrderWordAnswer } from '../../interface';
+import { IOrderWordItem, TOrderWordValue, IOrderWordFormattedItem, TOrderWordAnswer, TOrderWordAnswerFormatted } from '../../interface';
 import { BlockService } from '@skyeng/libs/blocks/base/service/block';
 import { OrderWordModel } from '../../exercise/model';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { getBlockConfig } from '@skyeng/libs/blocks/base/config/helpers';
 import { OrderWordBlockApi } from '../../exercise/api';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { map, skip, debounceTime, share, take, combineLatest, switchMap } from 'rxjs/operators';
+import { Observable, BehaviorSubject, timer } from 'rxjs';
+import { map, skip, debounceTime, share, take, combineLatest, switchMap, mapTo, tap } from 'rxjs/operators';
 import * as shuffleSeed from 'shuffle-seed';
+import { OrderWordScoreStrategy } from '../../exercise/score';
+import { BlockConfig } from '@skyeng/libs/blocks/base/config/config';
 
 @Component({
   selector: 'sky-order-word',
   template: `
-    <sky-order-word-view [items]="formattedItems$ | async"
+    <sky-order-word-view *ngIf="initDone$ | async"
+                         [items]="formattedItems$ | async"
                          (set)="set($event)">
     </sky-order-word-view>
   `,
@@ -22,8 +25,10 @@ export class OrderWordComponent implements OnInit, OnDestroy {
   @Input() id: string;
 
   public formattedItems$: Observable<IOrderWordFormattedItem[]>;
+  public initDone$: Observable<boolean>;
 
   private blockApi: OrderWordBlockApi;
+  private blockConfig: BlockConfig;
   private items = new BehaviorSubject<IOrderWordItem[]>([]);
   private model: OrderWordModel;
 
@@ -34,9 +39,26 @@ export class OrderWordComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit() {
+    this.initDone$ = timer(0).pipe(
+      mapTo(true),
+      tap(() => this.init()),
+    );
+  }
+
+  // uglyhack due to custom elements hooks calling issue
+  private init() {
+    this.blockConfig = getBlockConfig(this.elementRef.nativeElement);
     this.model = new OrderWordModel();
 
-    const itemsLoaded$ = this.items.pipe(
+    this.blockApi = this.blockService.createApi<TOrderWordValue, TOrderWordAnswer, OrderWordBlockApi>({
+      api: OrderWordBlockApi,
+      blockId: this.id,
+      model: this.model,
+      scoreStrategy: OrderWordScoreStrategy,
+      blockConfig: this.blockConfig,
+    });
+
+    const itemsInitDone$ = this.items.pipe(
       skip(1),
       debounceTime(0),
       take(1),
@@ -44,7 +66,7 @@ export class OrderWordComponent implements OnInit, OnDestroy {
     );
 
     // set model's correct answer
-    itemsLoaded$
+    itemsInitDone$
       .pipe(
         map(items => items.map(item => item.id)),
         takeUntilDestroyed(this),
@@ -52,30 +74,18 @@ export class OrderWordComponent implements OnInit, OnDestroy {
       .subscribe(correctAnswer => this.model.addCorrectAnswer(correctAnswer));
 
     // shuffle items
-    itemsLoaded$
+    itemsInitDone$
       .pipe(
         map(items => this.shuffleItems(items)),
         takeUntilDestroyed(this),
       )
       .subscribe(items => this.items.next(items));
 
-    const correctAnswer$ = this.model.correctAnswers$.pipe(
-      map(correctAnswers => correctAnswers[0]),
-    );
-
-    this.formattedItems$ = itemsLoaded$.pipe(
+    this.formattedItems$ = itemsInitDone$.pipe(
       switchMap(() => this.items),
-      combineLatest(this.model.answers$, correctAnswer$),
-      map(([ items, answers, correctAnswer ]) => this.formatAnswerItems(items, answers, correctAnswer)),
+      combineLatest(this.blockApi.currentAnswer$),
+      map(([ items, currentAnswer ]) => this.formatAnswerItems(items, currentAnswer)),
     );
-
-    // wait for correct answers to init
-    // TODO: move as observable to blockApi
-    this.model.correctAnswersInited$
-      .pipe(
-        takeUntilDestroyed(this),
-      )
-      .subscribe(() => this.init());
   }
 
   public ngOnDestroy() {
@@ -96,61 +106,17 @@ export class OrderWordComponent implements OnInit, OnDestroy {
     this.model.addAnswer({ value });
   }
 
-  private init() {
-    const blockConfig = getBlockConfig(this.elementRef.nativeElement);
-
-    this.blockApi = this.blockService.createApi<TOrderWordValue, TOrderWordAnswer, OrderWordBlockApi>({
-      api: OrderWordBlockApi,
-      blockId: this.id,
-      model: this.model,
-      blockConfig,
-    });
-  }
-
-  private formatAnswerItems(
-    items: IOrderWordItem[],
-    answers: TOrderWordAnswer[],
-    correctAnswer: string[]
-  ): IOrderWordFormattedItem[] {
-    const previousAnswerValue = answers[answers.length - 2] ? answers[answers.length - 2].value : null;
-    const currentAnswerValue = answers[answers.length - 1] ? answers[answers.length - 1].value : [];
-
+  private formatAnswerItems(items: IOrderWordItem[], currentAnswer?: TOrderWordAnswerFormatted): IOrderWordFormattedItem[] {
     let orderedItems = items;
 
-    if (currentAnswerValue.length) {
-      orderedItems = currentAnswerValue.map(id => items.find(item => item.id === id)!);
+    if (currentAnswer) {
+      orderedItems = currentAnswer.value.map(({ id }) => items.find(item => item.id === id)!);
     }
 
-    let hasWrongItem = false;
-    let newCorrectWasSet = false;
-    let lastCorrectIndex = -1;
-
-    return orderedItems.map((item, index) => {
-      // TODO: (?) duplicates isCorrect check in scoring
-      let isCorrect: boolean | null = null;
-
-      if (
-        currentAnswerValue.length
-        && !hasWrongItem
-        && (index === correctAnswer.indexOf(item.id))
-        && (index - lastCorrectIndex === 1)
-      ) {
-        isCorrect = true;
-        lastCorrectIndex = index;
-
-        if (!previousAnswerValue || (index !== previousAnswerValue.indexOf(item.id))) {
-          newCorrectWasSet = true;
-        }
-      }
-      else if (
-        currentAnswerValue.length
-        && !hasWrongItem
-        && !newCorrectWasSet
-        && (index !== correctAnswer.indexOf(item.id))
-      ) {
-        isCorrect = false;
-        hasWrongItem = true;
-      }
+    return orderedItems.map(item => {
+      const isCorrect = currentAnswer
+        ? currentAnswer.value.find(({ id }) => id === item.id)!.isCorrect
+        : null;
 
       return { ...item, isCorrect };
     });
