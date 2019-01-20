@@ -4,10 +4,12 @@ import { OrderWordComponent } from './component/order-word/order-word';
 import { OrderWordItemComponent } from './component/order-word-item/order-word-item';
 import { OrderWordViewComponent } from './component/order-word/order-word-view';
 import { OrderWordAnswerItemComponent } from './component/order-word-answer-item/order-word-answer-item';
+import { BaseModule } from '@skyeng/libs/base/module';
 
 @NgModule({
   imports: [
     CommonModule,
+    BaseModule,
   ],
   declarations: [
     OrderWordComponent,

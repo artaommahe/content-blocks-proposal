@@ -12,10 +12,6 @@ import * as shuffleSeed from 'shuffle-seed';
 @Component({
   selector: 'sky-order-word',
   template: `
-    <div hidden>
-      <ng-content></ng-content>
-    </div>
-
     <sky-order-word-view [items]="formattedItems$ | async"
                          (set)="set($event)">
     </sky-order-word-view>

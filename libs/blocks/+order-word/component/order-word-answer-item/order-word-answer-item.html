@@ -9,7 +9,7 @@
   <div class="content"
        [class.-correct]="isCorrect()"
        [class.-wrong]="isWrong()">
-    <ng-container *ngTemplateOutlet="item.templateRef"></ng-container>
+    <sky-nodes-portal [nodes]="item.contentNodes"></sky-nodes-portal>
   </div>
 
   <div class="move">
