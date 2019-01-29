@@ -1,30 +1,32 @@
 import { BlockBaseScoreStrategy } from '../../base/score/strategy/base';
-import { TScoreHandler, IBlockScoreStrategyConfig } from '../../base/score/interface';
-import { TOrderWordValue } from '../interface';
-import { addIsCorrectToItems } from '../helpers';
+import { IBlockScoreStrategyConfig } from '../../base/score/interface';
+import {
+  TOrderWordValue, TOrderWordAnswer, IOrderWordAnswerValueFormatted,
+  IOrderWordAnswerFormatted, TOrderWordScoreHandlerParams, TOrderWordScoreHandler
+} from '../interface';
+import { OrderWordModel } from './model';
+import { Observable, combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 interface IScoreMetadata {
   fails: { [ index: number ]: string[] };
 }
 
-interface IAnswerItemWithIsCorrect {
-  id: string;
-  isCorrect: boolean | null;
-}
-
 interface IAnswerItemsIsCorrectDiff {
   startingIndex: number;
-  changedItems: IAnswerItemWithIsCorrect[];
+  changedItems: IOrderWordAnswerValueFormatted[];
 }
 
-export class OrderWordScoreStrategy extends BlockBaseScoreStrategy {
+export class OrderWordScoreStrategy extends BlockBaseScoreStrategy<
+  TOrderWordValue, TOrderWordAnswer, OrderWordModel, IOrderWordAnswerFormatted, TOrderWordScoreHandlerParams
+> {
   // TODO: clear on reset
   private scoreMetadata: IScoreMetadata = {
     fails: {},
   };
 
   constructor(
-    config: IBlockScoreStrategyConfig<any, any>,
+    config: IBlockScoreStrategyConfig<TOrderWordValue, TOrderWordAnswer, OrderWordModel>,
   ) {
     super(config);
 
@@ -33,19 +35,29 @@ export class OrderWordScoreStrategy extends BlockBaseScoreStrategy {
     ];
   }
 
-  private orderWordScoreHandler: TScoreHandler<TOrderWordValue> = ({ score, model, answer }) => {
-    const answers = model.getAnswers();
-    const correctAnswer = model.getCorrectAnswers()[0];
-    const answerIndex = answers.indexOf(answer);
+  protected getScoreAnswers(model: OrderWordModel): Observable<IOrderWordAnswerFormatted[]> {
+    return model.formattedAnswers$;
+  }
 
-    // TODO: use items with isCorrect
-    const answersItemsWithIsCorrect: IAnswerItemWithIsCorrect[][] = answers.map((answer, index) =>
-      addIsCorrectToItems(
-        answer.value.map(id => ({ id })),
-        answers.slice(0, index + 1),
-        correctAnswer
-      )
+  protected getScoreHandlerParams(model: OrderWordModel): Observable<TOrderWordScoreHandlerParams> {
+    const correctAnswer$ = model.correctAnswers$.pipe(
+      map(correctAnwers => correctAnwers[0]),
     );
+
+    return combineLatest(model.formattedAnswers$, correctAnswer$).pipe(
+      map(([ formattedAnswers, correctAnswer ]) => ({ formattedAnswers, correctAnswer })),
+    );
+  }
+
+  private orderWordScoreHandler: TOrderWordScoreHandler = (
+    score,
+    answer,
+    { formattedAnswers, correctAnswer }
+  ) => {
+    const answerIndex = formattedAnswers.findIndex(({ createdAt }) => createdAt === answer.createdAt);
+    const prevAnswerItems = formattedAnswers[answerIndex - 1]
+      ? formattedAnswers[answerIndex - 1].formattedValue
+      : undefined;
 
     /**
      * есть S=1 балл, он делится на N где,
@@ -55,12 +67,11 @@ export class OrderWordScoreStrategy extends BlockBaseScoreStrategy {
      * После того, как дан ответ, у нас осталось N2 = N-1 элементов для выбора,
      * и какое-то кол-во баллов S2, ну и применяем тот же алгоритм (edited)
      */
-    const currentAnswer = answersItemsWithIsCorrect[answerIndex];
-    const previousAnswer = answersItemsWithIsCorrect[answerIndex - 1];
-    const diff = this.getIsCorrectDiff(currentAnswer, previousAnswer);
+    // Score: right 3.04 | wrong 6.96 | remaining 0
+    const { changedItems, startingIndex } = this.getItemsDiff(answer.formattedValue, prevAnswerItems);
 
-    diff.changedItems.forEach((item, changedItemIndex) => {
-      const itemIndex = diff.startingIndex + changedItemIndex;
+    changedItems.forEach((item, changedItemIndex) => {
+      const itemIndex = startingIndex + changedItemIndex;
       const indexFails = this.scoreMetadata.fails[itemIndex] || [];
       const remainingScore = score.maxScore - score.wrong - score.right;
       const remainigAnswers = correctAnswer.length - itemIndex - indexFails.length;
@@ -86,7 +97,10 @@ export class OrderWordScoreStrategy extends BlockBaseScoreStrategy {
     return score;
   }
 
-  private getIsCorrectDiff(current: IAnswerItemWithIsCorrect[], previous?: IAnswerItemWithIsCorrect[]): IAnswerItemsIsCorrectDiff {
+  private getItemsDiff(
+    current: IOrderWordAnswerValueFormatted[],
+    previous?: IOrderWordAnswerValueFormatted[]
+  ): IAnswerItemsIsCorrectDiff {
     let startingIndex = -1;
 
     const changedItems = current.filter((item, index) => {

@@ -1,4 +1,5 @@
 import { IBlockAnswer } from '../base/model/interface';
+import { TScoreHandler } from '../base/score/interface';
 
 export type TOrderWordValue = string[];
 export type TOrderWordAnswer = IBlockAnswer<TOrderWordValue>;
@@ -7,7 +8,16 @@ export interface IOrderWordAnswerValueFormatted {
   id: string;
   isCorrect: boolean | null;
 }
-export type TOrderWordAnswerFormatted = IBlockAnswer<IOrderWordAnswerValueFormatted[]>;
+export interface IOrderWordAnswerFormatted extends TOrderWordAnswer {
+  formattedValue: IOrderWordAnswerValueFormatted[];
+}
+
+export interface TOrderWordScoreHandlerParams {
+  formattedAnswers: IOrderWordAnswerFormatted[];
+  correctAnswer: string[];
+}
+
+export type TOrderWordScoreHandler = TScoreHandler<IOrderWordAnswerFormatted, TOrderWordScoreHandlerParams>;
 
 export interface IOrderWordItem {
   id: string;

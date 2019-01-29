@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, Input, OnInit, OnDestroy, ElementRef } from '@angular/core';
-import { IOrderWordItem, TOrderWordValue, IOrderWordFormattedItem, TOrderWordAnswer, TOrderWordAnswerFormatted } from '../../interface';
+import { IOrderWordItem, TOrderWordValue, IOrderWordFormattedItem, TOrderWordAnswer, IOrderWordAnswerFormatted } from '../../interface';
 import { BlockService } from '@skyeng/libs/blocks/base/service/block';
 import { OrderWordModel } from '../../exercise/model';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
@@ -50,11 +50,12 @@ export class OrderWordComponent implements OnInit, OnDestroy {
     this.blockConfig = getBlockConfig(this.elementRef.nativeElement);
     this.model = new OrderWordModel();
 
-    this.blockApi = this.blockService.createApi<TOrderWordValue, TOrderWordAnswer, OrderWordBlockApi>({
+    this.blockApi = this.blockService.createApi<TOrderWordValue, TOrderWordAnswer, OrderWordModel, OrderWordBlockApi>({
       api: OrderWordBlockApi,
       blockId: this.id,
       model: this.model,
-      scoreStrategy: OrderWordScoreStrategy,
+      // TODO: fix any
+      scoreStrategy: <any> OrderWordScoreStrategy,
       blockConfig: this.blockConfig,
     });
 
@@ -83,8 +84,8 @@ export class OrderWordComponent implements OnInit, OnDestroy {
 
     this.formattedItems$ = itemsInitDone$.pipe(
       switchMap(() => this.items),
-      combineLatest(this.blockApi.currentAnswer$),
-      map(([ items, currentAnswer ]) => this.formatAnswerItems(items, currentAnswer)),
+      combineLatest(this.model.currentFormattedAnswer$),
+      map(([ items, currentFormattedAnswer ]) => this.formatAnswerItems(items, currentFormattedAnswer)),
     );
   }
 
@@ -106,16 +107,16 @@ export class OrderWordComponent implements OnInit, OnDestroy {
     this.model.addAnswer({ value });
   }
 
-  private formatAnswerItems(items: IOrderWordItem[], currentAnswer?: TOrderWordAnswerFormatted): IOrderWordFormattedItem[] {
+  private formatAnswerItems(items: IOrderWordItem[], currentAnswer?: IOrderWordAnswerFormatted): IOrderWordFormattedItem[] {
     let orderedItems = items;
 
     if (currentAnswer) {
-      orderedItems = currentAnswer.value.map(({ id }) => items.find(item => item.id === id)!);
+      orderedItems = currentAnswer.formattedValue.map(({ id }) => items.find(item => item.id === id)!);
     }
 
     return orderedItems.map(item => {
       const isCorrect = currentAnswer
-        ? currentAnswer.value.find(({ id }) => id === item.id)!.isCorrect
+        ? currentAnswer.formattedValue.find(({ id }) => id === item.id)!.isCorrect
         : null;
 
       return { ...item, isCorrect };
