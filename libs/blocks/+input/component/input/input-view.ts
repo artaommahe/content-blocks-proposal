@@ -38,7 +38,6 @@ export class InputViewComponent implements AfterViewInit, OnDestroy {
 
   public ngAfterViewInit() {
     this.ngZone.runOutsideAngular(() => {
-      // TODO: recreate listener on reset
       fromEvent<KeyboardEvent>(this.inputRef.nativeElement, 'input')
         .pipe(
           map(event => (<HTMLInputElement> event.target).value),

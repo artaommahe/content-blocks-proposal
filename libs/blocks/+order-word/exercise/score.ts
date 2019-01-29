@@ -20,7 +20,6 @@ interface IAnswerItemsIsCorrectDiff {
 export class OrderWordScoreStrategy extends BlockBaseScoreStrategy<
   TOrderWordValue, TOrderWordAnswer, OrderWordModel, IOrderWordAnswerFormatted, TOrderWordScoreHandlerParams
 > {
-  // TODO: clear on reset
   private scoreMetadata: IScoreMetadata = {
     fails: {},
   };
@@ -33,6 +32,14 @@ export class OrderWordScoreStrategy extends BlockBaseScoreStrategy<
     this.handlers = [
       this.orderWordScoreHandler,
     ];
+  }
+
+  protected reset(): void {
+    super.reset();
+
+    this.scoreMetadata = {
+      fails: {}
+    };
   }
 
   protected getScoreAnswers(model: OrderWordModel): Observable<IOrderWordAnswerFormatted[]> {

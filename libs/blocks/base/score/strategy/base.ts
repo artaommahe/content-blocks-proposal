@@ -1,13 +1,13 @@
 import { MAX_SCORE_DEFAULT } from '../const';
 import { IBlockScore, IBlockScoreStrategyConfig, TScoreHandler } from '../interface';
-import { scan, map, pairwise, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
+import { scan, map, pairwise, startWith, switchMap, withLatestFrom, distinctUntilChanged } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { BlockScoreApi } from '../service/score-api';
 import { TBlockId } from '../../interface';
 import { BlockBaseModel } from '../../model/base';
 import { BlockConfig } from '../../config/config';
 import { IBlockAnswer } from '../../model/interface';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 
 export class BlockBaseScoreStrategy<
   TValue,
@@ -22,6 +22,7 @@ export class BlockBaseScoreStrategy<
   protected blockConfig: BlockConfig;
   protected handlers: TScoreHandler<THandlerAnswer, THandlerParams>[] = [];
   protected destroyedOptions = { initMethod: this.init, destroyMethod: this.destroy };
+  protected resetSubj = new Subject<void>();
 
   constructor(
     config: IBlockScoreStrategyConfig<TValue, TAnswer, TModel>,
@@ -61,17 +62,29 @@ export class BlockBaseScoreStrategy<
 
     const score$ = this.score(model, startingScore).pipe(
       startWith(startingScore),
-      // TODO: distinctUntiChanged, dont send same score
+      distinctUntilChanged((prev, next) =>
+        (prev.right === next.right) && (prev.wrong === next.wrong)
+      ),
     );
 
-    // reset score on model reset
-    model.reset$
+    // reset score
+    this.resetSubj.asObservable()
       .pipe(
         startWith(null),
         switchMap(() => score$),
         takeUntilDestroyed(this, this.destroyedOptions),
       )
       .subscribe(score => this.set(score));
+
+    model.reset$
+      .pipe(
+        takeUntilDestroyed(this, this.destroyedOptions),
+      )
+      .subscribe(() => this.reset());
+  }
+
+  protected reset(): void {
+    this.resetSubj.next();
   }
 
   protected score(model: TModel, startingScore: IBlockScore): Observable<IBlockScore> {
