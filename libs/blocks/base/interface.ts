@@ -23,13 +23,15 @@ export interface ConstructorType<T> extends Function {
 export interface IBlockApiConfig<
   TValue,
   TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>,
+  TModel extends BlockBaseModel<TValue, TAnswer> = BlockBaseModel<TValue, TAnswer>,
   TBlockApi extends BaseBlockApi<TValue, TAnswer> = BaseBlockApi<TValue, TAnswer>,
+  TScoreStrategy extends BlockBaseScoreStrategy<TValue, TAnswer, TModel> = BlockBaseScoreStrategy<TValue, TAnswer, TModel>,
 > {
   blockId?: TBlockId;
   blockConfig?: BlockConfig;
   api?: ConstructorType<TBlockApi>;
-  model?: BlockBaseModel<TValue, TAnswer>;
-  scoreStrategy?: typeof BlockBaseScoreStrategy;
-  scoreStrategyConfig?: Partial<IBlockScoreStrategyConfig<TValue, TAnswer>>;
+  model?: TModel;
+  scoreStrategy?: ConstructorType<TScoreStrategy>;
+  scoreStrategyConfig?: Partial<IBlockScoreStrategyConfig<TValue, TAnswer, TModel>>;
   syncStrategy?: typeof BlockBaseSyncStrategy;
 }

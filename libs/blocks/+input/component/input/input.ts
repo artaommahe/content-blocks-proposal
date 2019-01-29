@@ -117,7 +117,8 @@ export class InputComponent implements OnInit, OnDestroy {
       blockId: this.id,
       model: this.model,
       blockConfig: this.blockConfig,
-      scoreStrategy: InputScoreStrategy,
+      // TODO: fix any
+      scoreStrategy: <any> InputScoreStrategy,
     });
   }
 }

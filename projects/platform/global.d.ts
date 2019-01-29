@@ -7,3 +7,5 @@ declare module 'shuffle-seed' {
   let s: IShuffleSeed;
   export = s;
 }
+
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>

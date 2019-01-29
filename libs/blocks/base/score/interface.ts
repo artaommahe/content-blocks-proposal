@@ -9,11 +9,15 @@ export interface IBlockScoreConfig {
   maxScore?: number;
 }
 
-export interface IBlockScoreStrategyConfig<TValue, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>> {
+export interface IBlockScoreStrategyConfig<
+  TValue,
+  TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>,
+  TModel extends BlockBaseModel<TValue, TAnswer> = BlockBaseModel<TValue, TAnswer>
+> {
   blockScoreApi: BlockScoreApi;
   blockId: TBlockId;
   blockConfig: BlockConfig;
-  model?: BlockBaseModel<TValue, TAnswer>;
+  model?: TModel;
 }
 
 export interface IBlockScore {
@@ -33,10 +37,11 @@ export interface IBlockScoreRemove {
   blockId: TBlockId;
 }
 
-export type TScoreHandler<TValue = any, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>> = (
-  params: {
-    score: IBlockScore;
-    answer: TAnswer;
-    model: BlockBaseModel<TValue, TAnswer>;
-  }
-) => IBlockScore | undefined;
+export type TScoreHandler<THandlerAnswer, TParams = void> =
+  (score: IBlockScore, answer: THandlerAnswer, params: TParams) => IBlockScore | undefined;
+
+export interface ISimpleScoreHandlerParams<TValue> {
+  correctAnswers: TValue[];
+}
+
+export type TSimpleScoreHandler<TAnswer, TValue> = TScoreHandler<TAnswer, ISimpleScoreHandlerParams<TValue>>;

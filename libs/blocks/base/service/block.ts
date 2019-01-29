@@ -7,6 +7,8 @@ import { BlockSyncApi } from '../sync/service/sync-api';
 import { BlockConfig } from '../config/config';
 import { IBlockAnswer } from '../model/interface';
 import { BlockSimpleScoreStrategy } from '../score/strategy/simple';
+import { BlockBaseModel } from '../model/base';
+import { BlockBaseScoreStrategy } from '../score/strategy/base';
 
 @Injectable({ providedIn: 'root' })
 export class BlockService {
@@ -19,14 +21,18 @@ export class BlockService {
   public createApi<
     TValue = void,
     TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>,
-    TBlockApi extends BaseBlockApi<TValue, TAnswer> = BaseBlockApi<TValue, TAnswer>,
+    TModel extends BlockBaseModel<TValue, TAnswer> = BlockBaseModel<TValue, TAnswer>,
+    TBlockApi extends BaseBlockApi<TValue, TAnswer, TModel> = BaseBlockApi<TValue, TAnswer, TModel>,
+    TScoreStrategy extends BlockBaseScoreStrategy<TValue, TAnswer, TModel> = BlockBaseScoreStrategy<TValue, TAnswer, TModel>,
   >(
-    config: IBlockApiConfig<TValue, TAnswer, TBlockApi>
+    config: IBlockApiConfig<TValue, TAnswer, TModel, TBlockApi, TScoreStrategy>
   ): TBlockApi {
     config.blockId = config.blockId || this.createBlockId();
     config.blockConfig = config.blockConfig || new BlockConfig;
 
-    const ScoreStrategy = config.scoreStrategy || BlockSimpleScoreStrategy;
+    // TODO: fix any
+    const ScoreStrategy = config.scoreStrategy
+      || (<ConstructorType<BlockBaseScoreStrategy<TValue, TAnswer, TModel, TAnswer, any>>> BlockSimpleScoreStrategy);
     const SyncStrategy = config.syncStrategy || BlockBaseSyncStrategy;
 
     // TODO: (?) move entities init to BlockApi constructor
