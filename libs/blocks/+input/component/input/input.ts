@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, OnInit, Input, OnDestroy, ElementRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, Input, OnDestroy, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { BaseBlockApi } from '@skyeng/libs/blocks/base/api/base';
 import { BlockApiService } from '@skyeng/libs/blocks/base/api/service/block-api';
 import { TInputValue, TInputAnswer } from '../../interface';
@@ -20,9 +20,10 @@ interface IAddAnswerParams {
   template: `
     <ng-content></ng-content>
 
-    <sky-input-view [blockId]="id"
-                    [correctAnswers]="model.correctAnswers$ | async"
-                    [currentAnswer]="model.currentAnswer$ | async"
+    <sky-input-view *ngIf="blockApi"
+                    [blockId]="id"
+                    [correctAnswers]="blockApi.model.correctAnswers$ | async"
+                    [currentAnswer]="blockApi.model.currentAnswer$ | async"
                     [isMobile]="isMobile$ | async"
                     [value]="value$ | async"
                     [wrongAnswersCount]="wrongAnswersCount$ | async"
@@ -41,40 +42,51 @@ export class InputComponent implements OnInit, OnDestroy {
   private value = new BehaviorSubject<string>('');
 
   public isMobile$: Observable<boolean>;
-  public model: InputModel;
   public value$ = this.value.asObservable();
   public wrongAnswersCount$: Observable<number>;
 
   constructor(
     private blockApiService: BlockApiService,
     private elementRef: ElementRef<HTMLElement>,
+    private changeDetectorRef: ChangeDetectorRef,
   ) {
   }
 
   public ngOnInit() {
-    this.blockConfig = getBlockConfig(this.elementRef.nativeElement);
-    this.model = new InputModel();
+    // empty inputs bug https://github.com/angular/angular/issues/28266
+    window.setTimeout(() => {
+      this.blockConfig = getBlockConfig(this.elementRef.nativeElement);
 
-    this.isMobile$ = this.blockConfig.select([ 'isMobile' ], false);
+      this.blockApi = this.blockApiService.createApi<TInputValue, TInputAnswer, InputModel, InputScoreStrategy>({
+        blockId: this.id,
+        model: InputModel,
+        blockConfig: this.blockConfig,
+        scoreStrategy: InputScoreStrategy,
+      });
 
-    // wait for correct answers to init api
-    this.model.correctAnswersInited$
-      .pipe(
-        takeUntilDestroyed(this),
-      )
-      .subscribe(() => this.init());
+      this.isMobile$ = this.blockConfig.select([ 'isMobile' ], false);
 
-    this.model.currentAnswer$
-      .pipe(
-        map(currentAnswer => currentAnswer ? currentAnswer.value : ''),
-        takeUntilDestroyed(this),
-      )
-      .subscribe(this.value);
+      // wait for correct answers to init api
+      this.blockApi.correctAnswersInited$
+        .pipe(
+          takeUntilDestroyed(this),
+        )
+        .subscribe(() => this.blockApi.init());
 
-    this.wrongAnswersCount$ = this.model.answers$.pipe(
-      map(answers => answers.filter(answer => answer.isCorrect === false)),
-      map(answers => answers.length),
-    );
+      this.blockApi.model.currentAnswer$
+        .pipe(
+          map(currentAnswer => currentAnswer ? currentAnswer.value : ''),
+          takeUntilDestroyed(this),
+        )
+        .subscribe(this.value);
+
+      this.wrongAnswersCount$ = this.blockApi.model.answers$.pipe(
+        map(answers => answers.filter(answer => answer.isCorrect === false)),
+        map(answers => answers.length),
+      );
+
+      this.changeDetectorRef.markForCheck();
+    });
   }
 
   public ngOnDestroy() {
@@ -84,7 +96,7 @@ export class InputComponent implements OnInit, OnDestroy {
   // https://github.com/angular/angular/issues/22114
   @Input()
   public addCorrectAnswer = (correctAnswer: string): void => {
-    this.model.addCorrectAnswer(correctAnswer);
+    this.blockApi.model.addCorrectAnswer(correctAnswer);
   }
 
   public addAnswer(value: TInputValue, params: IAddAnswerParams = {}): void {
@@ -95,11 +107,11 @@ export class InputComponent implements OnInit, OnDestroy {
     const isCorrect = (params.isTyping ? null : undefined);
     const isKeyUsed = params.isKeyUsed || false;
 
-    this.model.addAnswer({ value, isKeyUsed, isCorrect });
+    this.blockApi.model.addAnswer({ value, isKeyUsed, isCorrect });
   }
 
   public useKey(): void {
-    const correctAnswers = this.model.getCorrectAnswers();
+    const correctAnswers = this.blockApi.model.getCorrectAnswers();
 
     if (!correctAnswers.length) {
       return;
@@ -110,14 +122,5 @@ export class InputComponent implements OnInit, OnDestroy {
 
   public typing(value: string): void {
     this.addAnswer(value, { isTyping: true });
-  }
-
-  private init() {
-    this.blockApi = this.blockApiService.createApi<TInputValue, TInputAnswer, InputModel, InputScoreStrategy>({
-      blockId: this.id,
-      model: this.model,
-      blockConfig: this.blockConfig,
-      scoreStrategy: InputScoreStrategy,
-    });
   }
 }

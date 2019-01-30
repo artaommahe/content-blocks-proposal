@@ -1,10 +1,31 @@
 .root {
+  position: relative;
   display: inline-block;
+  padding: 10px;
+  border: 1px dashed gray;
   text-align: center;
+
+  &.-correct {
+    border-color: lightseagreen;
+  }
+
+  &.-wrong {
+    border-color: #ff2222;
+  }
+
+  &.-mobile {
+    background-color: #00bcd43b;
+  }
 }
 
 .items {
   display: flex;
+}
+
+.score {
+  position: absolute;
+  top: 33px;
+  right: 2px;
 }
 
 .set {

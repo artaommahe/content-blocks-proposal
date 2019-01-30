@@ -1,11 +1,11 @@
-import { Component, ChangeDetectionStrategy, Input, OnInit, OnDestroy, ElementRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, OnInit, OnDestroy, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { IOrderWordItem, TOrderWordValue, IOrderWordFormattedItem, TOrderWordAnswer, IOrderWordAnswerFormatted } from '../../interface';
 import { BlockApiService } from '@skyeng/libs/blocks/base/api/service/block-api';
 import { OrderWordModel } from '../../exercise/model';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { getBlockConfig } from '@skyeng/libs/blocks/base/config/helpers';
-import { Observable, BehaviorSubject, timer } from 'rxjs';
-import { map, skip, debounceTime, share, take, combineLatest, switchMap, mapTo, tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { map, skip, debounceTime, share, take, combineLatest, switchMap } from 'rxjs/operators';
 import * as shuffleSeed from 'shuffle-seed';
 import { OrderWordScoreStrategy } from '../../exercise/score';
 import { BlockConfig } from '@skyeng/libs/blocks/base/config/config';
@@ -14,9 +14,11 @@ import { BaseBlockApi } from '@skyeng/libs/blocks/base/api/base';
 @Component({
   selector: 'sky-order-word',
   template: `
-    <sky-order-word-view *ngIf="initDone$ | async"
+    <sky-order-word-view *ngIf="formattedItems$"
+                         [blockId]="id"
+                         [isMobile]="isMobile$ | async"
                          [items]="formattedItems$ | async"
-                         (set)="set($event)">
+                         (set)="addAnswer($event)">
     </sky-order-word-view>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,72 +27,75 @@ export class OrderWordComponent implements OnInit, OnDestroy {
   @Input() id: string;
 
   public formattedItems$: Observable<IOrderWordFormattedItem[]>;
-  public initDone$: Observable<boolean>;
+  public isMobile$: Observable<boolean>;
 
   private blockApi: BaseBlockApi<TOrderWordValue, TOrderWordAnswer, OrderWordModel, OrderWordScoreStrategy>;
   private blockConfig: BlockConfig;
   private items = new BehaviorSubject<IOrderWordItem[]>([]);
-  private model: OrderWordModel;
 
   constructor(
     private elementRef: ElementRef<HTMLElement>,
     private blockApiService: BlockApiService,
+    private changeDetectorRef: ChangeDetectorRef,
   ) {
   }
 
   public ngOnInit() {
-    this.initDone$ = timer(0).pipe(
-      mapTo(true),
-      tap(() => this.init()),
-    );
-  }
+    // empty inputs bug https://github.com/angular/angular/issues/28266
+    window.setTimeout(() => {
+      this.blockConfig = getBlockConfig(this.elementRef.nativeElement);
 
-  // uglyhack due to custom elements hooks calling issue
-  private init() {
-    this.blockConfig = getBlockConfig(this.elementRef.nativeElement);
-    this.model = new OrderWordModel();
+      this.blockApi = this.blockApiService.createApi<TOrderWordValue, TOrderWordAnswer, OrderWordModel, OrderWordScoreStrategy>({
+        blockId: this.id,
+        model: OrderWordModel,
+        scoreStrategy: OrderWordScoreStrategy,
+        blockConfig: this.blockConfig,
+      });
 
-    this.blockApi = this.blockApiService.createApi<TOrderWordValue, TOrderWordAnswer, OrderWordModel, OrderWordScoreStrategy>({
-      blockId: this.id,
-      model: this.model,
-      scoreStrategy: OrderWordScoreStrategy,
-      blockConfig: this.blockConfig,
+      this.isMobile$ = this.blockConfig.select([ 'isMobile' ], false);
+
+      const itemsInitDone$ = this.items.pipe(
+        skip(1),
+        debounceTime(0),
+        take(1),
+        share(),
+      );
+
+      // set model's correct answer
+      itemsInitDone$
+        .pipe(
+          map(items => items.map(item => item.id)),
+          takeUntilDestroyed(this),
+        )
+        .subscribe(correctAnswer => this.blockApi.model.addCorrectAnswer(correctAnswer));
+
+      // wait for correct answer to init api
+      itemsInitDone$
+        .pipe(
+          takeUntilDestroyed(this),
+        )
+        .subscribe(() => this.blockApi.init());
+
+      // shuffle items
+      itemsInitDone$
+        .pipe(
+          map(items => this.shuffleItems(items)),
+          takeUntilDestroyed(this),
+        )
+        .subscribe(items => this.items.next(items));
+
+      this.formattedItems$ = itemsInitDone$.pipe(
+        switchMap(() => this.items),
+        combineLatest(this.blockApi.model.currentFormattedAnswer$),
+        map(([ items, currentFormattedAnswer ]) => this.formatAnswerItems(items, currentFormattedAnswer)),
+      );
+
+      this.changeDetectorRef.markForCheck();
     });
-
-    const itemsInitDone$ = this.items.pipe(
-      skip(1),
-      debounceTime(0),
-      take(1),
-      share(),
-    );
-
-    // set model's correct answer
-    itemsInitDone$
-      .pipe(
-        map(items => items.map(item => item.id)),
-        takeUntilDestroyed(this),
-      )
-      .subscribe(correctAnswer => this.model.addCorrectAnswer(correctAnswer));
-
-    // shuffle items
-    itemsInitDone$
-      .pipe(
-        map(items => this.shuffleItems(items)),
-        takeUntilDestroyed(this),
-      )
-      .subscribe(items => this.items.next(items));
-
-    this.formattedItems$ = itemsInitDone$.pipe(
-      switchMap(() => this.items),
-      combineLatest(this.model.currentFormattedAnswer$),
-      map(([ items, currentFormattedAnswer ]) => this.formatAnswerItems(items, currentFormattedAnswer)),
-    );
   }
 
   public ngOnDestroy() {
-    if (this.blockApi) {
-      this.blockApi.destroy();
-    }
+    this.blockApi.destroy();
   }
 
   @Input()
@@ -101,8 +106,8 @@ export class OrderWordComponent implements OnInit, OnDestroy {
     ]);
   }
 
-  public set(value: string[]): void {
-    this.model.addAnswer({ value });
+  public addAnswer(value: string[]): void {
+    this.blockApi.model.addAnswer({ value });
   }
 
   private formatAnswerItems(items: IOrderWordItem[], currentAnswer?: IOrderWordAnswerFormatted): IOrderWordFormattedItem[] {

@@ -26,6 +26,21 @@ export class OrderWordModel extends BlockBaseModel<TOrderWordValue> {
     );
   }
 
+  protected isAcceptableAnswer(answerPart: Partial<TOrderWordAnswer>): boolean {
+    const value = answerPart.value;
+    const currentAnswer = this.getCurrentAnswer();
+
+    if (
+      value
+      && currentAnswer
+      && currentAnswer.value.every((item, index) => item === value[index])
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
   private formatAnswers(answers: TOrderWordAnswer[], correctAnswer: string[]): IOrderWordAnswerFormatted[] {
     return answers.map((answer, answerIndex) => {
       const previousAnswerValue = answers[answerIndex - 1] ? answers[answerIndex - 1].value : null;

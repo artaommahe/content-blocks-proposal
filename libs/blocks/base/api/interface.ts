@@ -10,7 +10,7 @@ export interface IBlockApiConfig<
 > {
   blockId?: TBlockId;
   blockConfig?: BlockConfig;
-  model?: TModel;
+  model?: Constructor<TModel>;
   scoreStrategy?: Constructor<TScoreStrategy>;
   syncStrategy?: typeof BlockBaseSyncStrategy;
 }

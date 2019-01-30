@@ -1,5 +1,13 @@
 .blocks {
   margin-bottom: 30px;
+
+  > * {
+    display: flex;
+  }
+
+  > * > * {
+    margin-right: 20px;
+  }
 }
 
 .controls {

@@ -33,23 +33,26 @@ export class BlockApiService {
     // any due to typings mess here
     const ScoreStrategy = config.scoreStrategy || <Constructor<TScoreStrategy>> <any> BlockSimpleScoreStrategy;
     const SyncStrategy = config.syncStrategy || BlockBaseSyncStrategy;
+    const Model = config.model || <Constructor<TModel>> <any>  BlockBaseModel;
+
+    const model = new Model();
 
     // TODO: (?) move entities init to BlockApi constructor
     const score = new ScoreStrategy({
       blockScoreApi: this.blockScoreApi,
       blockId: config.blockId,
-      model: config.model,
+      model: model,
       blockConfig: config.blockConfig,
     });
 
     const sync = new SyncStrategy<TAnswer, TModel>({
       blockSyncApi: this.blockSyncApi,
       blockId: config.blockId,
-      model: config.model,
+      model: model,
       blockConfig: config.blockConfig,
     });
 
-    return new BaseBlockApi<TValue, TAnswer, TModel, TScoreStrategy>(config.model, score, sync);
+    return new BaseBlockApi<TValue, TAnswer, TModel, TScoreStrategy>(model, score, sync);
   }
 
   private createBlockId(): TBlockId {

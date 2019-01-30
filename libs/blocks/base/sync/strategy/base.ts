@@ -27,11 +27,9 @@ export class BlockBaseSyncStrategy<
     this.model = config.model;
     this.blockId = config.blockId;
     this.blockConfig = config.blockConfig;
-
-    this.init();
   }
 
-  private init(): void {
+  public init(): void {
     if (this.model) {
       this.bindToModel(this.model);
     }

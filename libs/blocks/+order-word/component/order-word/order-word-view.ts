@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter } from '@angular/core';
 import { IOrderWordFormattedItem } from '../../interface';
+import { TBlockId } from '@skyeng/libs/blocks/base/core/interface';
 
 @Component({
   selector: 'sky-order-word-view',
@@ -8,12 +9,22 @@ import { IOrderWordFormattedItem } from '../../interface';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OrderWordViewComponent {
+  @Input() blockId: TBlockId;
+  @Input() isMobile: boolean;
   @Input() items: IOrderWordFormattedItem[];
 
   @Output() set = new EventEmitter<string[]>();
 
   public itemTrack(_index: number, item: IOrderWordFormattedItem): string {
     return item.id;
+  }
+
+  public isCorrect(): boolean {
+    return this.items && this.items.every(item => item.isCorrect === true);
+  }
+
+  public isWrong(): boolean {
+    return this.items && this.items.some(item => item.isCorrect === false);
   }
 
   public moveLeft(index: number): void {

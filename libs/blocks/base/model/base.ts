@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { map, skip, debounceTime, take, mapTo } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { IBlockAnswer } from './interface';
 import { Store } from '@skyeng/libs/store/store';
 
@@ -24,7 +24,6 @@ export class BlockBaseModel<
 
   public answers$ = this.store.select([ 'answers' ]);
   public correctAnswers$ = this.store.select([ 'correctAnswers' ]);
-  public correctAnswersInited$: Observable<void>;
   public currentAnswer$: Observable<TAnswer | undefined>;
   public newAnswer$ = this.store.on('newAnswer');
   public reset$ = this.store.on('reset');
@@ -34,13 +33,6 @@ export class BlockBaseModel<
     this.currentAnswer$ = this.answers$.pipe(
       map(answers => answers[answers.length - 1]),
     );
-
-    this.correctAnswersInited$ = this.correctAnswers$.pipe(
-      skip(1),
-      debounceTime(0),
-      take(1),
-      mapTo(undefined),
-    );
   }
 
   public addCorrectAnswer(correctAnswer: TValue): void {
@@ -48,12 +40,7 @@ export class BlockBaseModel<
   }
 
   public addAnswer(answerPart: Partial<TAnswer>): void {
-    const currentAnswer = this.getCurrentAnswer();
-
-    if (currentAnswer
-      && (answerPart.value === currentAnswer.value)
-      && (currentAnswer.isCorrect !== null)
-    ) {
+    if (!this.isAcceptableAnswer(answerPart)) {
       return;
     }
 
@@ -111,6 +98,20 @@ export class BlockBaseModel<
     return !!value && correctAnswers.includes(value);
   }
 
+  protected isAcceptableAnswer(answerPart: Partial<TAnswer>): boolean {
+    const currentAnswer = this.getCurrentAnswer();
+
+    if (
+      currentAnswer
+      && (answerPart.value === currentAnswer.value)
+      && (currentAnswer.isCorrect !== null)
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
   protected storeAddCorrectAnswer(correctAnswer: TValue): void {
     this.store.update(state => ({
       ...state,
@@ -128,10 +129,7 @@ export class BlockBaseModel<
   protected storeAddAnswer(answer: TAnswer): void {
     this.store.update(state => ({
       ...state,
-      answers: [
-        ...state.answers,
-        answer,
-      ],
+      answers: [ ...state.answers, answer ],
     }));
   }
 }

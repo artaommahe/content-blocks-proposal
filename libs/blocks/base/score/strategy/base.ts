@@ -29,8 +29,12 @@ export class BlockBaseScoreStrategy<
     this.blockId = config.blockId;
     this.model = config.model;
     this.blockConfig = config.blockConfig;
+  }
 
-    this.init();
+  public init(): void {
+    if (this.model) {
+      this.bindToModel(this.model);
+    }
   }
 
   public destroy(): void {
@@ -43,12 +47,6 @@ export class BlockBaseScoreStrategy<
     }
 
     this.blockScoreApi.set(this.blockId, score);
-  }
-
-  protected init(): void {
-    if (this.model) {
-      this.bindToModel(this.model);
-    }
   }
 
   protected isEnabled(): boolean {

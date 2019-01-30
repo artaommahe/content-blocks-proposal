@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, Input, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, OnInit, ChangeDetectorRef } from '@angular/core';
 import { TBlockId } from '@skyeng/libs/blocks/base/core/interface';
 import { Observable } from 'rxjs';
 import { share, map } from 'rxjs/operators';
@@ -7,7 +7,8 @@ import { BlockScoreApi } from '../../service/score-api';
 @Component({
   selector: 'sky-block-score-indicator',
   template: `
-    <sky-block-score-indicator-view [right]="right$ | async"
+    <sky-block-score-indicator-view *ngIf="right$"
+                                    [right]="right$ | async"
                                     [wrong]="wrong$ | async">
     </sky-block-score-indicator-view>
   `,
@@ -21,20 +22,26 @@ export class ScoreIndicatorComponent implements OnInit {
 
   constructor(
     private blockScoreApi: BlockScoreApi,
+    private changeDetectorRef: ChangeDetectorRef,
   ) {
   }
 
   public ngOnInit() {
-    const score$ = this.blockScoreApi.onSet(this.blockId).pipe(
-      share(),
-    );
+    // empty inputs bug https://github.com/angular/angular/issues/28266
+    window.setTimeout(() => {
+      const score$ = this.blockScoreApi.onSet(this.blockId).pipe(
+        share(),
+      );
 
-    this.right$ = score$.pipe(
-      map(score => (score.right * 100)),
-    );
+      this.right$ = score$.pipe(
+        map(score => (score.right * 100)),
+      );
 
-    this.wrong$ = score$.pipe(
-      map(score => (score.wrong * 100)),
-    );
+      this.wrong$ = score$.pipe(
+        map(score => (score.wrong * 100)),
+      );
+
+      this.changeDetectorRef.markForCheck();
+    });
   }
 }

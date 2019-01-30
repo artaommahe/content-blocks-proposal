@@ -1,4 +1,7 @@
-<div class="root">
+<div class="root"
+     [class.-correct]="isCorrect()"
+     [class.-wrong]="isWrong()"
+     [class.-mobile]="isMobile">
   <div class="items">
     <sky-order-word-answer-item *ngFor="
                                   let item of items;
@@ -14,6 +17,10 @@
                                 (moveRight)="moveRight(index)">
     </sky-order-word-answer-item>
   </div>
+
+  <sky-block-score-indicator class="score"
+                             [blockId]="blockId">
+  </sky-block-score-indicator>
 
   <button class="set"
           (click)="onSetClick()">
