@@ -9,5 +9,5 @@ import { BlockGroupComponent } from './component/group/group';
     BlockGroupComponent,
   ],
 })
-export class BlocksBaseModule {
+export class BlocksBaseCoreModule {
 }

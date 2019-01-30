@@ -1,4 +1,4 @@
-import { TBlockId } from '../../interface';
+import { TBlockId } from '../../core/interface';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { IBlockSyncStrategyConfig, IBlockSyncReset } from '../interface';

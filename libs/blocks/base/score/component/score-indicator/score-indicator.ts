@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, Input, OnInit } from '@angular/core';
-import { TBlockId } from '@skyeng/libs/blocks/base/interface';
+import { TBlockId } from '@skyeng/libs/blocks/base/core/interface';
 import { Observable } from 'rxjs';
 import { share, map } from 'rxjs/operators';
 import { BlockScoreApi } from '../../service/score-api';

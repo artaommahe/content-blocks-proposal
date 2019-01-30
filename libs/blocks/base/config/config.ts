@@ -1,4 +1,4 @@
-import { IBlockConfig } from '../interface';
+import { IBlockConfig } from '../core/interface';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { pluck, tap, distinctUntilChanged, map } from 'rxjs/operators';
 import * as deepmerge from 'deepmerge';

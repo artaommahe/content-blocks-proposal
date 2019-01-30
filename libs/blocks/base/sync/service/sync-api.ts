@@ -1,4 +1,4 @@
-import { TBlockId } from '../../interface';
+import { TBlockId } from '../../core/interface';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { BLOCK_SYNC_EVENTS } from '../const';

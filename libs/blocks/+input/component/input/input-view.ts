@@ -5,7 +5,7 @@ import {
 import { TInputValue, TInputAnswer } from '../../interface';
 import { fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
-import { TBlockId } from '@skyeng/libs/blocks/base/interface';
+import { TBlockId } from '@skyeng/libs/blocks/base/core/interface';
 import { debounceTime, map } from 'rxjs/operators';
 
 const KEY_AVAILABLE_ANSWERS_COUNT = 3;

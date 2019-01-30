@@ -1,4 +1,4 @@
-import { TBlockId } from '../interface';
+import { TBlockId } from '../core/interface';
 import { BlockSyncApi } from './service/sync-api';
 import { BlockBaseModel } from '../model/base';
 import { BlockConfig } from '../config/config';

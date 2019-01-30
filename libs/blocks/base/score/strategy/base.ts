@@ -3,7 +3,7 @@ import { IBlockScore, IBlockScoreStrategyConfig, TScoreHandler } from '../interf
 import { scan, map, pairwise, startWith, switchMap, withLatestFrom, distinctUntilChanged } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { BlockScoreApi } from '../service/score-api';
-import { TBlockId } from '../../interface';
+import { TBlockId } from '../../core/interface';
 import { BlockBaseModel } from '../../model/base';
 import { BlockConfig } from '../../config/config';
 import { IBlockAnswer } from '../../model/interface';

@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
-import { BaseBlockApi } from './block-api';
-import { TBlockId, IBlockApiConfig } from '../interface';
-import { BlockScoreApi } from '../score/service/score-api';
-import { BlockBaseSyncStrategy } from '../sync/strategy/base';
-import { BlockSyncApi } from '../sync/service/sync-api';
-import { BlockConfig } from '../config/config';
-import { IBlockAnswer } from '../model/interface';
-import { BlockSimpleScoreStrategy } from '../score/strategy/simple';
-import { BlockBaseModel } from '../model/base';
-import { BlockBaseScoreStrategy } from '../score/strategy/base';
+import { BaseBlockApi } from '../base';
+import { IBlockApiConfig } from '../interface';
+import { BlockScoreApi } from '../../score/service/score-api';
+import { BlockBaseSyncStrategy } from '../../sync/strategy/base';
+import { BlockSyncApi } from '../../sync/service/sync-api';
+import { BlockConfig } from '../../config/config';
+import { IBlockAnswer } from '../../model/interface';
+import { BlockSimpleScoreStrategy } from '../../score/strategy/simple';
+import { BlockBaseModel } from '../../model/base';
+import { BlockBaseScoreStrategy } from '../../score/strategy/base';
+import { TBlockId } from '../../core/interface';
 
 @Injectable({ providedIn: 'root' })
-export class BlockService {
+export class BlockApiService {
   constructor(
     private blockScoreApi: BlockScoreApi,
     private blockSyncApi: BlockSyncApi,

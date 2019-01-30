@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, OnInit, Input, OnDestroy, ElementRef } from '@angular/core';
-import { BaseBlockApi } from '@skyeng/libs/blocks/base/service/block-api';
-import { BlockService } from '@skyeng/libs/blocks/base/service/block';
+import { BaseBlockApi } from '@skyeng/libs/blocks/base/api/base';
+import { BlockApiService } from '@skyeng/libs/blocks/base/api/service/block-api';
 import { TInputValue, TInputAnswer } from '../../interface';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { InputModel } from '../../exercise/model';
@@ -46,7 +46,7 @@ export class InputComponent implements OnInit, OnDestroy {
   public wrongAnswersCount$: Observable<number>;
 
   constructor(
-    private blockService: BlockService,
+    private blockApiService: BlockApiService,
     private elementRef: ElementRef<HTMLElement>,
   ) {
   }
@@ -113,7 +113,7 @@ export class InputComponent implements OnInit, OnDestroy {
   }
 
   private init() {
-    this.blockApi = this.blockService.createApi<TInputValue, TInputAnswer, InputModel, InputScoreStrategy>({
+    this.blockApi = this.blockApiService.createApi<TInputValue, TInputAnswer, InputModel, InputScoreStrategy>({
       blockId: this.id,
       model: this.model,
       blockConfig: this.blockConfig,

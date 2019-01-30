@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, Input, ElementRef, HostBinding, AfterViewInit } from '@angular/core';
 import { OrderWordComponent } from '../order-word/order-word';
-import { getParentComponent } from '@skyeng/libs/blocks/base/helpers';
+import { getParentComponent } from '@skyeng/libs/blocks/base/core/helpers';
 import { IOrderWordItem } from '../../interface';
 
 @Component({

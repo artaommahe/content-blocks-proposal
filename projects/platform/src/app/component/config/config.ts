@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, Output, EventEmitter, OnInit } from '@angular/core';
-import { IBlockConfig } from '@skyeng/libs/blocks/base/interface';
+import { IBlockConfig } from '@skyeng/libs/blocks/base/core/interface';
 import * as deepmerge from 'deepmerge';
 
 const INITIAL_CONFIG: IBlockConfig = {

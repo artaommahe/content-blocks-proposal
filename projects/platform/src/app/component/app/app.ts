@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IBlockConfig } from '@skyeng/libs/blocks/base/interface';
+import { IBlockConfig } from '@skyeng/libs/blocks/base/core/interface';
 
 @Component({
   selector: 'app-root',

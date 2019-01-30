@@ -4,7 +4,7 @@ import { SyncApiService } from './sync-api';
 import { BLOCK_SYNC_EVENTS } from '@skyeng/libs/blocks/base/sync/const';
 import { ISyncBlocksData } from '../interface';
 import { shareReplay, delayWhen, map } from 'rxjs/operators';
-import { TBlockId } from '@skyeng/libs/blocks/base/interface';
+import { TBlockId } from '@skyeng/libs/blocks/base/core/interface';
 import {
   IBlockSyncRequestRestoreAnswers, IBlockSyncAddAnswer, IBlockSyncRestoreAnswers,
   IBlockSyncAnswer, IBlockSyncEvent, IBlockSyncReset,

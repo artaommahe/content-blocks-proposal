@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { IBlockConfig } from '../../interface';
-import { BlockConfig } from '../../config/config';
+import { IBlockConfig } from '../../../core/interface';
+import { BlockConfig } from '../../../config/config';
 
 @Component({
   selector: 'sky-block-group',

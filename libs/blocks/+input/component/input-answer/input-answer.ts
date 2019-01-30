@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, ElementRef, OnInit } from '@angular/core';
 import { InputComponent } from '../input/input';
-import { getParentComponent } from '@skyeng/libs/blocks/base/helpers';
+import { getParentComponent } from '@skyeng/libs/blocks/base/core/helpers';
 
 @Component({
   selector: 'sky-input-answer',

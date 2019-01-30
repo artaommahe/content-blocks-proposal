@@ -3,15 +3,15 @@ import { BlocksInputModule } from './+input/module';
 import { createCustomElement } from '@angular/elements';
 import { INPUT_BLOCKS } from './+input/blocks';
 import { ElementZoneStrategyFactory } from 'elements-zone-strategy';
-import { BlocksBaseModule } from './base/module';
-import { BASE_BLOCKS } from './base/blocks';
+import { BlocksBaseCoreModule } from './base/core/module';
+import { BASE_CORE_BLOCKS } from './base/core/blocks';
 import { SCORE_BLOCKS } from './base/score/blocks';
 import { BlocksScoreModule } from './base/score/module';
 import { BlocksOrderWordModule } from './+order-word/module';
 import { ORDER_WORD_BLOCKS } from './+order-word/blocks';
 
 const CUSTOM_ELEMENTS = [
-  ...BASE_BLOCKS,
+  ...BASE_CORE_BLOCKS,
   ...INPUT_BLOCKS,
   ...SCORE_BLOCKS,
   ...ORDER_WORD_BLOCKS,
@@ -20,7 +20,7 @@ const CUSTOM_ELEMENTS = [
 @NgModule({
   imports: [
     // only for example, lazy loading instead of direct import in real app
-    BlocksBaseModule,
+    BlocksBaseCoreModule,
     BlocksInputModule,
     BlocksScoreModule,
     BlocksOrderWordModule,

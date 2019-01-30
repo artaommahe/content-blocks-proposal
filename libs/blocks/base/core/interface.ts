@@ -1,9 +1,9 @@
-import { IBlockScoreConfig } from './score/interface';
-import { IBlockSyncConfig } from './sync/interface';
-import { BlockBaseModel } from './model/base';
-import { BlockConfig } from './config/config';
-import { BlockBaseScoreStrategy } from './score/strategy/base';
-import { BlockBaseSyncStrategy } from './sync/strategy/base';
+import { IBlockScoreConfig } from '../score/interface';
+import { IBlockSyncConfig } from '../sync/interface';
+import { BlockBaseModel } from '../model/base';
+import { BlockConfig } from '../config/config';
+import { BlockBaseScoreStrategy } from '../score/strategy/base';
+import { BlockBaseSyncStrategy } from '../sync/strategy/base';
 
 export type TBlockId = string;
 

@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, Input, OnInit, OnDestroy, ElementRef } from '@angular/core';
 import { IOrderWordItem, TOrderWordValue, IOrderWordFormattedItem, TOrderWordAnswer, IOrderWordAnswerFormatted } from '../../interface';
-import { BlockService } from '@skyeng/libs/blocks/base/service/block';
+import { BlockApiService } from '@skyeng/libs/blocks/base/api/service/block-api';
 import { OrderWordModel } from '../../exercise/model';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { getBlockConfig } from '@skyeng/libs/blocks/base/config/helpers';
@@ -9,7 +9,7 @@ import { map, skip, debounceTime, share, take, combineLatest, switchMap, mapTo, 
 import * as shuffleSeed from 'shuffle-seed';
 import { OrderWordScoreStrategy } from '../../exercise/score';
 import { BlockConfig } from '@skyeng/libs/blocks/base/config/config';
-import { BaseBlockApi } from '@skyeng/libs/blocks/base/service/block-api';
+import { BaseBlockApi } from '@skyeng/libs/blocks/base/api/base';
 
 @Component({
   selector: 'sky-order-word',
@@ -34,7 +34,7 @@ export class OrderWordComponent implements OnInit, OnDestroy {
 
   constructor(
     private elementRef: ElementRef<HTMLElement>,
-    private blockService: BlockService,
+    private blockApiService: BlockApiService,
   ) {
   }
 
@@ -50,7 +50,7 @@ export class OrderWordComponent implements OnInit, OnDestroy {
     this.blockConfig = getBlockConfig(this.elementRef.nativeElement);
     this.model = new OrderWordModel();
 
-    this.blockApi = this.blockService.createApi<TOrderWordValue, TOrderWordAnswer, OrderWordModel, OrderWordScoreStrategy>({
+    this.blockApi = this.blockApiService.createApi<TOrderWordValue, TOrderWordAnswer, OrderWordModel, OrderWordScoreStrategy>({
       blockId: this.id,
       model: this.model,
       scoreStrategy: OrderWordScoreStrategy,
