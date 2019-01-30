@@ -10,10 +10,8 @@ import { IBlockAnswer } from '../../model/interface';
 import { Observable, of, Subject } from 'rxjs';
 
 export class BlockBaseScoreStrategy<
-  TValue,
-  TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>,
-  TModel extends BlockBaseModel<TValue, TAnswer> = BlockBaseModel<TValue, TAnswer>,
-  THandlerAnswer extends TAnswer = TAnswer,
+  TModel extends BlockBaseModel<any, any> = BlockBaseModel<any, any>,
+  THandlerAnswer = IBlockAnswer<any>,
   THandlerParams = void,
 > {
   protected blockScoreApi: BlockScoreApi;
@@ -25,7 +23,7 @@ export class BlockBaseScoreStrategy<
   protected resetSubj = new Subject<void>();
 
   constructor(
-    config: IBlockScoreStrategyConfig<TValue, TAnswer, TModel>,
+    config: IBlockScoreStrategyConfig<TModel>,
   ) {
     this.blockScoreApi = config.blockScoreApi;
     this.blockId = config.blockId;

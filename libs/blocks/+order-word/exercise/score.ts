@@ -1,8 +1,7 @@
 import { BlockBaseScoreStrategy } from '../../base/score/strategy/base';
 import { IBlockScoreStrategyConfig } from '../../base/score/interface';
 import {
-  TOrderWordValue, TOrderWordAnswer, IOrderWordAnswerValueFormatted,
-  IOrderWordAnswerFormatted, TOrderWordScoreHandlerParams, TOrderWordScoreHandler
+  IOrderWordAnswerValueFormatted, IOrderWordAnswerFormatted, TOrderWordScoreHandlerParams, TOrderWordScoreHandler
 } from '../interface';
 import { OrderWordModel } from './model';
 import { Observable, combineLatest } from 'rxjs';
@@ -18,14 +17,14 @@ interface IAnswerItemsIsCorrectDiff {
 }
 
 export class OrderWordScoreStrategy extends BlockBaseScoreStrategy<
-  TOrderWordValue, TOrderWordAnswer, OrderWordModel, IOrderWordAnswerFormatted, TOrderWordScoreHandlerParams
+  OrderWordModel, IOrderWordAnswerFormatted, TOrderWordScoreHandlerParams
 > {
   private scoreMetadata: IScoreMetadata = {
     fails: {},
   };
 
   constructor(
-    config: IBlockScoreStrategyConfig<TOrderWordValue, TOrderWordAnswer, OrderWordModel>,
+    config: IBlockScoreStrategyConfig<OrderWordModel>,
   ) {
     super(config);
 

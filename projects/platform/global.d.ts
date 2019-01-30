@@ -9,3 +9,5 @@ declare module 'shuffle-seed' {
 }
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+
+type Constructor<T> = new(...args: any[]) => T;

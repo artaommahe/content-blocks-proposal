@@ -4,12 +4,12 @@ import { BlockService } from '@skyeng/libs/blocks/base/service/block';
 import { OrderWordModel } from '../../exercise/model';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { getBlockConfig } from '@skyeng/libs/blocks/base/config/helpers';
-import { OrderWordBlockApi } from '../../exercise/api';
 import { Observable, BehaviorSubject, timer } from 'rxjs';
 import { map, skip, debounceTime, share, take, combineLatest, switchMap, mapTo, tap } from 'rxjs/operators';
 import * as shuffleSeed from 'shuffle-seed';
 import { OrderWordScoreStrategy } from '../../exercise/score';
 import { BlockConfig } from '@skyeng/libs/blocks/base/config/config';
+import { BaseBlockApi } from '@skyeng/libs/blocks/base/service/block-api';
 
 @Component({
   selector: 'sky-order-word',
@@ -27,7 +27,7 @@ export class OrderWordComponent implements OnInit, OnDestroy {
   public formattedItems$: Observable<IOrderWordFormattedItem[]>;
   public initDone$: Observable<boolean>;
 
-  private blockApi: OrderWordBlockApi;
+  private blockApi: BaseBlockApi<TOrderWordValue, TOrderWordAnswer, OrderWordModel, OrderWordScoreStrategy>;
   private blockConfig: BlockConfig;
   private items = new BehaviorSubject<IOrderWordItem[]>([]);
   private model: OrderWordModel;
@@ -50,12 +50,10 @@ export class OrderWordComponent implements OnInit, OnDestroy {
     this.blockConfig = getBlockConfig(this.elementRef.nativeElement);
     this.model = new OrderWordModel();
 
-    this.blockApi = this.blockService.createApi<TOrderWordValue, TOrderWordAnswer, OrderWordModel, OrderWordBlockApi>({
-      api: OrderWordBlockApi,
+    this.blockApi = this.blockService.createApi<TOrderWordValue, TOrderWordAnswer, OrderWordModel, OrderWordScoreStrategy>({
       blockId: this.id,
       model: this.model,
-      // TODO: fix any
-      scoreStrategy: <any> OrderWordScoreStrategy,
+      scoreStrategy: OrderWordScoreStrategy,
       blockConfig: this.blockConfig,
     });
 

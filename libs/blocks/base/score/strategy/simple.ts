@@ -6,12 +6,10 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export class BlockSimpleScoreStrategy<
-  TValue,
-  TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>,
-  TModel extends BlockBaseModel<TValue, TAnswer> = BlockBaseModel<TValue, TAnswer>,
-> extends BlockBaseScoreStrategy<TValue, TAnswer, TModel, TAnswer, ISimpleScoreHandlerParams<TValue>> {
+  TModel extends BlockBaseModel<any, any> = BlockBaseModel<any, any>,
+> extends BlockBaseScoreStrategy<TModel, IBlockAnswer<any>, ISimpleScoreHandlerParams<any>> {
   constructor(
-    config: IBlockScoreStrategyConfig<TValue, TAnswer, TModel>,
+    config: IBlockScoreStrategyConfig<TModel>,
   ) {
     super(config);
 
@@ -22,13 +20,13 @@ export class BlockSimpleScoreStrategy<
     ];
   }
 
-  protected getScoreHandlerParams(model: TModel): Observable<ISimpleScoreHandlerParams<TValue>> {
+  protected getScoreHandlerParams(model: TModel): Observable<ISimpleScoreHandlerParams<any>> {
     return model.correctAnswers$.pipe(
       map(correctAnswers => ({ correctAnswers }))
     );
   }
 
-  protected sameScoreHandler: TSimpleScoreHandler<TAnswer, TValue> = (score, answer) => {
+  protected sameScoreHandler: TSimpleScoreHandler<IBlockAnswer<any>, any> = (score, answer) => {
     if (
       ((score.right + score.wrong) < score.maxScore)
       && (answer.isCorrect !== null)
@@ -39,7 +37,7 @@ export class BlockSimpleScoreStrategy<
     return score;
   }
 
-  protected rightScoreHandler: TSimpleScoreHandler<TAnswer, TValue> = (score, answer) => {
+  protected rightScoreHandler: TSimpleScoreHandler<IBlockAnswer<any>, any> = (score, answer) => {
     if (answer.isCorrect !== true) {
       return;
     }
@@ -50,7 +48,7 @@ export class BlockSimpleScoreStrategy<
     };
   }
 
-  protected wrongScoreHandler: TSimpleScoreHandler<TAnswer, TValue> = (score, answer, { correctAnswers }) => {
+  protected wrongScoreHandler: TSimpleScoreHandler<IBlockAnswer<any>, any> = (score, answer, { correctAnswers }) => {
     if (answer.isCorrect !== false) {
       return;
     }

@@ -36,7 +36,7 @@ interface IAddAnswerParams {
 export class InputComponent implements OnInit, OnDestroy {
   @Input() id: string;
 
-  private blockApi: BaseBlockApi<TInputValue, TInputAnswer>;
+  private blockApi: BaseBlockApi<TInputValue, TInputAnswer, InputModel, InputScoreStrategy>;
   private blockConfig: BlockConfig;
   private value = new BehaviorSubject<string>('');
 
@@ -113,12 +113,11 @@ export class InputComponent implements OnInit, OnDestroy {
   }
 
   private init() {
-    this.blockApi = this.blockService.createApi<TInputValue, TInputAnswer>({
+    this.blockApi = this.blockService.createApi<TInputValue, TInputAnswer, InputModel, InputScoreStrategy>({
       blockId: this.id,
       model: this.model,
       blockConfig: this.blockConfig,
-      // TODO: fix any
-      scoreStrategy: <any> InputScoreStrategy,
+      scoreStrategy: InputScoreStrategy,
     });
   }
 }

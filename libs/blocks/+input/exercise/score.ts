@@ -3,9 +3,9 @@ import { InputModel } from './model';
 import { IBlockScoreStrategyConfig, TSimpleScoreHandler } from '../../base/score/interface';
 import { BlockSimpleScoreStrategy } from '../../base/score/strategy/simple';
 
-export class InputScoreStrategy extends BlockSimpleScoreStrategy<TInputValue, TInputAnswer, InputModel> {
+export class InputScoreStrategy extends BlockSimpleScoreStrategy<InputModel> {
   constructor(
-    config: IBlockScoreStrategyConfig<TInputValue, TInputAnswer, InputModel>,
+    config: IBlockScoreStrategyConfig<InputModel>,
   ) {
     super(config);
 

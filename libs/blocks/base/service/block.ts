@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BaseBlockApi } from './block-api';
-import { TBlockId, IBlockApiConfig, ConstructorType } from '../interface';
+import { TBlockId, IBlockApiConfig } from '../interface';
 import { BlockScoreApi } from '../score/service/score-api';
 import { BlockBaseSyncStrategy } from '../sync/strategy/base';
 import { BlockSyncApi } from '../sync/service/sync-api';
@@ -22,17 +22,15 @@ export class BlockService {
     TValue = void,
     TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>,
     TModel extends BlockBaseModel<TValue, TAnswer> = BlockBaseModel<TValue, TAnswer>,
-    TBlockApi extends BaseBlockApi<TValue, TAnswer, TModel> = BaseBlockApi<TValue, TAnswer, TModel>,
-    TScoreStrategy extends BlockBaseScoreStrategy<TValue, TAnswer, TModel> = BlockBaseScoreStrategy<TValue, TAnswer, TModel>,
+    TScoreStrategy extends BlockBaseScoreStrategy<TModel, any, any> = BlockSimpleScoreStrategy<TModel>,
   >(
-    config: IBlockApiConfig<TValue, TAnswer, TModel, TBlockApi, TScoreStrategy>
-  ): TBlockApi {
+    config: IBlockApiConfig<TModel, TScoreStrategy>
+  ): BaseBlockApi<TValue, TAnswer, TModel, TScoreStrategy> {
     config.blockId = config.blockId || this.createBlockId();
-    config.blockConfig = config.blockConfig || new BlockConfig;
+    config.blockConfig = config.blockConfig || new BlockConfig();
 
-    // TODO: fix any
-    const ScoreStrategy = config.scoreStrategy
-      || (<ConstructorType<BlockBaseScoreStrategy<TValue, TAnswer, TModel, TAnswer, any>>> BlockSimpleScoreStrategy);
+    // any due to typings mess here
+    const ScoreStrategy = config.scoreStrategy || <Constructor<TScoreStrategy>> <any> BlockSimpleScoreStrategy;
     const SyncStrategy = config.syncStrategy || BlockBaseSyncStrategy;
 
     // TODO: (?) move entities init to BlockApi constructor
@@ -41,19 +39,16 @@ export class BlockService {
       blockId: config.blockId,
       model: config.model,
       blockConfig: config.blockConfig,
-      ...(config.scoreStrategyConfig || {})
     });
 
-    const sync = new SyncStrategy<TValue, TAnswer>({
+    const sync = new SyncStrategy<TAnswer, TModel>({
       blockSyncApi: this.blockSyncApi,
       blockId: config.blockId,
       model: config.model,
       blockConfig: config.blockConfig,
     });
 
-    const BlockApi = config.api || (<ConstructorType<TBlockApi>> BaseBlockApi);
-
-    return new BlockApi(config.model, score, sync);
+    return new BaseBlockApi<TValue, TAnswer, TModel, TScoreStrategy>(config.model, score, sync);
   }
 
   private createBlockId(): TBlockId {

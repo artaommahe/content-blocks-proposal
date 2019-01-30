@@ -8,11 +8,11 @@ export interface IBlockSyncConfig {
   enabled?: boolean;
 }
 
-export interface IBlockSyncStrategyConfig<TValue, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>> {
+export interface IBlockSyncStrategyConfig<TModel extends BlockBaseModel<any, any>> {
   blockSyncApi: BlockSyncApi;
   blockId: TBlockId;
   blockConfig: BlockConfig;
-  model?: BlockBaseModel<TValue, TAnswer>;
+  model?: TModel;
 }
 
 export interface IBlockSyncAnswer<TAnswer extends IBlockAnswer<any>> {

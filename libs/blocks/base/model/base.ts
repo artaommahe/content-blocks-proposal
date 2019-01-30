@@ -13,7 +13,10 @@ interface IStoreEvents<TAnswer> {
   reset: void;
 }
 
-export class BlockBaseModel<TValue, TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>> {
+export class BlockBaseModel<
+  TValue,
+  TAnswer extends IBlockAnswer<TValue> = IBlockAnswer<TValue>
+> {
   protected store = new Store<IStoreState<TValue, TAnswer>, IStoreEvents<TAnswer>>({
     answers: [],
     correctAnswers: [],
