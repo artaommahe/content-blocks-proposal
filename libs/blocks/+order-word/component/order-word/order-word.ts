@@ -1,15 +1,18 @@
 import { Component, ChangeDetectionStrategy, Input, OnInit, OnDestroy, ElementRef, ChangeDetectorRef } from '@angular/core';
-import { IOrderWordItem, TOrderWordValue, IOrderWordFormattedItem, TOrderWordAnswer, IOrderWordAnswerFormatted } from '../../interface';
+import {
+  IOrderWordItem, TOrderWordAnswerValue, IOrderWordFormattedItem,
+  TOrderWordAnswer, IOrderWordAnswerFormatted
+} from '../../interface';
 import { BlockApiService } from '@skyeng/libs/blocks/base/api/service/block-api';
 import { OrderWordModel } from '../../exercise/model';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { getBlockConfig } from '@skyeng/libs/blocks/base/config/helpers';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, skip, debounceTime, share, take, combineLatest, switchMap } from 'rxjs/operators';
-import * as shuffleSeed from 'shuffle-seed';
 import { OrderWordScoreStrategy } from '../../exercise/score';
 import { BlockConfig } from '@skyeng/libs/blocks/base/config/config';
 import { BaseBlockApi } from '@skyeng/libs/blocks/base/api/base';
+import { shuffleItems } from '@skyeng/libs/blocks/base/core/helpers';
 
 @Component({
   selector: 'sky-order-word',
@@ -29,7 +32,7 @@ export class OrderWordComponent implements OnInit, OnDestroy {
   public formattedItems$: Observable<IOrderWordFormattedItem[]>;
   public isMobile$: Observable<boolean>;
 
-  private blockApi: BaseBlockApi<TOrderWordValue, TOrderWordAnswer, OrderWordModel, OrderWordScoreStrategy>;
+  private blockApi: BaseBlockApi<TOrderWordAnswerValue, TOrderWordAnswer, OrderWordModel, OrderWordScoreStrategy>;
   private blockConfig: BlockConfig;
   private items = new BehaviorSubject<IOrderWordItem[]>([]);
 
@@ -45,7 +48,7 @@ export class OrderWordComponent implements OnInit, OnDestroy {
     window.setTimeout(() => {
       this.blockConfig = getBlockConfig(this.elementRef.nativeElement);
 
-      this.blockApi = this.blockApiService.createApi<TOrderWordValue, TOrderWordAnswer, OrderWordModel, OrderWordScoreStrategy>({
+      this.blockApi = this.blockApiService.createApi<TOrderWordAnswerValue, TOrderWordAnswer, OrderWordModel, OrderWordScoreStrategy>({
         blockId: this.id,
         model: OrderWordModel,
         scoreStrategy: OrderWordScoreStrategy,
@@ -79,7 +82,7 @@ export class OrderWordComponent implements OnInit, OnDestroy {
       // shuffle items
       itemsInitDone$
         .pipe(
-          map(items => this.shuffleItems(items)),
+          map(items => shuffleItems(items)),
           takeUntilDestroyed(this),
         )
         .subscribe(items => this.items.next(items));
@@ -124,23 +127,5 @@ export class OrderWordComponent implements OnInit, OnDestroy {
 
       return { ...item, isCorrect };
     });
-  }
-
-  private shuffleItems(items: IOrderWordItem[]): IOrderWordItem[] {
-    if (items.length < 2) {
-      return items;
-    }
-
-    let seed = items.map(item => item.id).join('');
-    let limit = 1000;
-    let shuffledItems = items;
-
-    do {
-      shuffledItems = shuffleSeed.shuffle(shuffledItems, seed);
-      seed += '_';
-      limit--;
-    } while (limit && (shuffledItems[0] === items[0]));
-
-    return shuffledItems;
   }
 }

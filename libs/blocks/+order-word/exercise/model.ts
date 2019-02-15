@@ -1,9 +1,9 @@
 import { BlockBaseModel } from '../../base/model/base';
-import { TOrderWordValue, IOrderWordAnswerFormatted, TOrderWordAnswer } from '../interface';
+import { TOrderWordAnswerValue, IOrderWordAnswerFormatted, TOrderWordAnswer } from '../interface';
 import { Observable } from 'rxjs';
 import { map, withLatestFrom, publishReplay, refCount } from 'rxjs/operators';
 
-export class OrderWordModel extends BlockBaseModel<TOrderWordValue> {
+export class OrderWordModel extends BlockBaseModel<TOrderWordAnswerValue> {
   public currentFormattedAnswer$: Observable<IOrderWordAnswerFormatted | undefined>;
   public formattedAnswers$: Observable<IOrderWordAnswerFormatted[]>;
 

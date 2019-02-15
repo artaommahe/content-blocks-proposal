@@ -1,8 +1,8 @@
 import { IBlockAnswer } from '../base/model/interface';
 import { TScoreHandler } from '../base/score/interface';
 
-export type TOrderWordValue = string[];
-export type TOrderWordAnswer = IBlockAnswer<TOrderWordValue>;
+export type TOrderWordAnswerValue = string[];
+export type TOrderWordAnswer = IBlockAnswer<TOrderWordAnswerValue>;
 
 export interface IOrderWordAnswerValueFormatted {
   id: string;
