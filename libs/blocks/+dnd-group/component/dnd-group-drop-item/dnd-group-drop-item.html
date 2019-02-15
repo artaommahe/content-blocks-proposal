@@ -1,0 +1,17 @@
+<div class="root"
+     [class.-dropable]="isDroppable()"
+     [class.-last]="isLast"
+     (click)="onDropClick()">
+  <div class="header">
+    <sky-nodes-portal [nodes]="dropItem.contentNodes"></sky-nodes-portal>
+  </div>
+
+  <div class="drops">
+    <sky-dnd-group-drag-item *ngFor="let dragItem of dropItem.currentDrags"
+                             [dragItem]="dragItem"
+                             [inDrop]="true"
+                             [draggingId]="draggingId"
+                             (itemDrag)="onItemDrag($event)">
+    </sky-dnd-group-drag-item>
+  </div>
+</div>

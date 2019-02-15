@@ -1,0 +1,35 @@
+.root {
+  padding: 5px;
+  border-radius: 4px;
+  background-color: mix(#5d9cec, #ffffff, 16%);
+  cursor: pointer;
+  box-sizing: border-box;
+
+  &.-draggable:hover {
+    background-color: mix(#5d9cec, #ffffff, 8%);
+  }
+
+  &.-dropped {
+    opacity: 0.64;
+    cursor: initial;
+  }
+
+  &.-dragging {
+    padding: 4px;
+    border: 1px solid #5d9cec;
+    opacity: 0.82;
+  }
+
+  &.-correct {
+    background-color: mix(#8cc152, #ffffff, 16%);
+    cursor: initial;
+  }
+
+  &.-wrong {
+    background-color: mix(#ff6666, #ffffff, 16%);
+
+    &:hover {
+      background-color: mix(#ff6666, #ffffff, 8%);
+    }
+  }
+}

@@ -4,7 +4,7 @@ import {
   IDndGroupAnswerValueFormatted, TDndGroupDragId
 } from '../interface';
 import { Observable } from 'rxjs';
-import { map, withLatestFrom, publishReplay, refCount } from 'rxjs/operators';
+import { map, withLatestFrom, share, publishReplay, refCount, shareReplay } from 'rxjs/operators';
 
 export class DndGroupModel extends BlockBaseModel<TDndGroupAnswerValue> {
   public currentFormattedAnswer$: Observable<IDndGroupAnswerFormatted | undefined>;
@@ -20,8 +20,7 @@ export class DndGroupModel extends BlockBaseModel<TDndGroupAnswerValue> {
     this.formattedAnswers$ = this.answers$.pipe(
       withLatestFrom(correctAnswer$),
       map(([ answers, correctAnswer ]) => this.formatAnswers(answers, correctAnswer)),
-      publishReplay(1),
-      refCount(),
+      shareReplay(1),
     );
 
     this.currentFormattedAnswer$ = this.formattedAnswers$.pipe(

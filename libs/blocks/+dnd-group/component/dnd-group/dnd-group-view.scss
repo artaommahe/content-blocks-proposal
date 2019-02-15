@@ -1,0 +1,28 @@
+.root {
+  position: relative;
+  display: inline-block;
+  padding: 10px;
+  border: 1px dashed gray;
+  text-align: center;
+
+  &.-mobile {
+    background-color: #00bcd43b;
+  }
+}
+
+.drags {
+  display: flex;
+
+  > *:not(:last-child) {
+    margin-right: 10px;
+  }
+}
+
+.drops {
+  margin-top: 20px;
+  display: flex;
+
+  > * {
+    width: 33%;
+  }
+}

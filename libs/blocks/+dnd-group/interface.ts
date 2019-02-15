@@ -36,3 +36,8 @@ export interface IDndGroupDragItemFormatted extends IDndGroupDragItem {
 export interface IDndGroupDropItemFormatted extends IDndGroupDropItem {
   currentDrags: IDndGroupDragItemFormatted[];
 }
+
+export interface IDropData {
+  draggingId: TDndGroupDragId;
+  dropItem: IDndGroupDropItemFormatted;
+}

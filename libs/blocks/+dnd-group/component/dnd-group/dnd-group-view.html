@@ -1,5 +1,19 @@
-<div class="root">
-  {{ dragItems | json }}
-  <br>
-  {{ dropItems | json }}
+<div class="root"
+     [class.-mobile]="isMobile">
+  <div class="drags">
+    <sky-dnd-group-drag-item *ngFor="let dragItem of dragItems"
+                             [dragItem]="dragItem"
+                             [draggingId]="draggingId"
+                             (itemDrag)="onItemDrag($event)">
+    </sky-dnd-group-drag-item>
+  </div>
+  <div class="drops">
+    <sky-dnd-group-drop-item *ngFor="let dropItem of dropItems; let last = last"
+                             [draggingId]="draggingId"
+                             [dropItem]="dropItem"
+                             [isLast]="last"
+                             (itemDrop)="onItemDrop($event)"
+                             (itemDrag)="onItemDrag($event)">
+    </sky-dnd-group-drop-item>
+  </div>
 </div>

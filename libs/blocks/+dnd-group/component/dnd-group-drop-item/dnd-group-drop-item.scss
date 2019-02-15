@@ -1,0 +1,30 @@
+.root {
+  &.-dropable:hover {
+    cursor: pointer;
+  }
+}
+
+.header {
+  padding: 0 10px;
+  text-align: left;
+}
+
+.drops {
+  display: flex;
+  flex-direction: column;
+  min-height: 100px;
+  padding: 5px 10px;
+  border-right: 1px dashed #e3e7eb;
+
+  .root.-last & {
+    border: 0;
+  }
+
+  .root.-dropable:hover & {
+    background-color: #e3e7eb;
+  }
+
+  > *:not(:first-child) {
+    margin-top: 10px;
+  }
+}

@@ -1,14 +1,14 @@
 import { Component, ChangeDetectionStrategy, Input, OnInit, OnDestroy, ElementRef, ChangeDetectorRef } from '@angular/core';
 import {
   IDndGroupDragItem, IDndGroupDropItem, TDndGroupAnswerValue,
-  TDndGroupAnswer, IDndGroupDragItemFormatted, IDndGroupDropItemFormatted, IDndGroupAnswerFormatted
+  TDndGroupAnswer, IDndGroupDragItemFormatted, IDndGroupDropItemFormatted, IDndGroupAnswerFormatted, TDndGroupDragId, IDropData
 } from '../../interface';
 import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { BaseBlockApi } from '@skyeng/libs/blocks/base/api/base';
 import { BlockConfig } from '@skyeng/libs/blocks/base/config/config';
 import { BlockApiService } from '@skyeng/libs/blocks/base/api/service/block-api';
 import { getBlockConfig } from '@skyeng/libs/blocks/base/config/helpers';
-import { skip, debounceTime, take, share, map, switchMap, first, mapTo, publishReplay, refCount } from 'rxjs/operators';
+import { skip, debounceTime, take, share, map, switchMap, first, mapTo, tap, shareReplay } from 'rxjs/operators';
 import { DndGroupModel } from '../../exercise/model';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { shuffleItems } from '@skyeng/libs/blocks/base/core/helpers';
@@ -18,7 +18,11 @@ import { shuffleItems } from '@skyeng/libs/blocks/base/core/helpers';
   template: `
     <sky-dnd-group-view *ngIf="initDone$ | async"
                         [dragItems]="formattedDragItems$ | async"
-                        [dropItems]="formattedDropItems$ | async">
+                        [dropItems]="formattedDropItems$ | async"
+                        [isMobile]="isMobile$ | async"
+                        [draggingId]="draggingId$ | async"
+                        (itemDrag)="onItemDrag($event)"
+                        (itemDrop)="onItemDrop($event)">
     </sky-dnd-group-view>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,11 +34,13 @@ export class DndGroupComponent implements OnInit, OnDestroy {
   public formattedDropItems$: Observable<IDndGroupDropItemFormatted[]>;
   public initDone$: Observable<boolean>;
   public isMobile$: Observable<boolean>;
+  public draggingId$: Observable<TDndGroupDragId | null>;
 
   private blockApi: BaseBlockApi<TDndGroupAnswerValue, TDndGroupAnswer, DndGroupModel>;
   private blockConfig: BlockConfig;
   private dragItems = new BehaviorSubject<IDndGroupDragItem[]>([]);
   private dropItems = new BehaviorSubject<IDndGroupDropItem[]>([]);
+  private draggingId = new BehaviorSubject<TDndGroupDragId | null>(null);
 
   constructor(
     private elementRef: ElementRef<HTMLElement>,
@@ -90,8 +96,8 @@ export class DndGroupComponent implements OnInit, OnDestroy {
           combineLatest(this.dragItems, this.blockApi.model.currentFormattedAnswer$),
         ),
         map(([ dragItems, currentFormattedAnswer ]) => this.formatDragItems(dragItems, currentFormattedAnswer)),
-        publishReplay(1),
-        refCount(),
+        tap(console.log),
+        shareReplay(1),
       );
 
       this.formattedDropItems$ = itemsInitDone$.pipe(
@@ -99,8 +105,8 @@ export class DndGroupComponent implements OnInit, OnDestroy {
           combineLatest(this.dropItems, this.formattedDragItems$)
         ),
         map(([ dropItems, formattedDragItems ]) => this.formatDropItems(dropItems, formattedDragItems)),
-        publishReplay(1),
-        refCount(),
+        tap(console.log),
+        shareReplay(1),
       );
 
       this.initDone$ = combineLatest(this.formattedDragItems$, this.formattedDropItems$).pipe(
@@ -108,6 +114,8 @@ export class DndGroupComponent implements OnInit, OnDestroy {
         first(),
         mapTo(true),
       );
+
+      this.draggingId$ = this.draggingId.asObservable();
 
       this.changeDetectorRef.markForCheck();
     });
@@ -124,6 +132,28 @@ export class DndGroupComponent implements OnInit, OnDestroy {
   @Input()
   public addDropItem = (dropItem: IDndGroupDropItem): void => {
     this.dropItems.next([ ...this.dropItems.getValue(), dropItem ]);
+  }
+
+  public onItemDrag(dragItem: IDndGroupDragItemFormatted): void {
+    const draggingId = this.draggingId.getValue() === dragItem.id
+      ? null
+      : dragItem.id;
+
+    this.draggingId.next(draggingId);
+  }
+
+  public onItemDrop({ dropItem, draggingId }: IDropData): void {
+    const currentAnswer = this.blockApi.model.getCurrentAnswer();
+    const currentValue = currentAnswer ? currentAnswer.value : {};
+
+    this.blockApi.model.addAnswer({
+      value: {
+        ...currentValue,
+        [ draggingId ]: dropItem.id
+      },
+    });
+
+    this.draggingId.next(null);
   }
 
   private getCorrectAnswerFromItems(dropItems: IDndGroupDropItem[]): TDndGroupAnswerValue {
