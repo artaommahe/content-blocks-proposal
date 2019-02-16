@@ -8,10 +8,11 @@ import { BaseBlockApi } from '@skyeng/libs/blocks/base/api/base';
 import { BlockConfig } from '@skyeng/libs/blocks/base/config/config';
 import { BlockApiService } from '@skyeng/libs/blocks/base/api/service/block-api';
 import { getBlockConfig } from '@skyeng/libs/blocks/base/config/helpers';
-import { skip, debounceTime, take, share, map, switchMap, first, mapTo, tap, shareReplay } from 'rxjs/operators';
+import { skip, debounceTime, take, share, map, switchMap, first, mapTo, shareReplay } from 'rxjs/operators';
 import { DndGroupModel } from '../../exercise/model';
 import { takeUntilDestroyed } from '@skyeng/libs/base/operator/take-until-destroyed';
 import { shuffleItems } from '@skyeng/libs/blocks/base/core/helpers';
+import { DndGroupScoreStrategy } from '../../exercise/score';
 
 @Component({
   selector: 'sky-dnd-group',
@@ -36,7 +37,7 @@ export class DndGroupComponent implements OnInit, OnDestroy {
   public isMobile$: Observable<boolean>;
   public draggingId$: Observable<TDndGroupDragId | null>;
 
-  private blockApi: BaseBlockApi<TDndGroupAnswerValue, TDndGroupAnswer, DndGroupModel>;
+  private blockApi: BaseBlockApi<TDndGroupAnswerValue, TDndGroupAnswer, DndGroupModel, DndGroupScoreStrategy>;
   private blockConfig: BlockConfig;
   private dragItems = new BehaviorSubject<IDndGroupDragItem[]>([]);
   private dropItems = new BehaviorSubject<IDndGroupDropItem[]>([]);
@@ -54,10 +55,13 @@ export class DndGroupComponent implements OnInit, OnDestroy {
     window.setTimeout(() => {
       this.blockConfig = getBlockConfig(this.elementRef.nativeElement);
 
-      this.blockApi = this.blockApiService.createApi<TDndGroupAnswerValue, TDndGroupAnswer, DndGroupModel>({
+      this.blockApi = this.blockApiService.createApi<
+        TDndGroupAnswerValue, TDndGroupAnswer, DndGroupModel, DndGroupScoreStrategy
+      >({
         blockId: this.id,
         blockConfig: this.blockConfig,
-        model: DndGroupModel
+        model: DndGroupModel,
+        scoreStrategy: DndGroupScoreStrategy,
       });
 
       this.isMobile$ = this.blockConfig.select([ 'isMobile' ], false);
@@ -68,6 +72,12 @@ export class DndGroupComponent implements OnInit, OnDestroy {
         take(1),
         share(),
       );
+
+      itemsInitDone$
+        .pipe(
+          takeUntilDestroyed(this),
+        )
+        .subscribe(([ _, dropItems ]) => this.blockApi.score.setGroupsCount(dropItems.length));
 
       itemsInitDone$
         .pipe(
@@ -96,7 +106,6 @@ export class DndGroupComponent implements OnInit, OnDestroy {
           combineLatest(this.dragItems, this.blockApi.model.currentFormattedAnswer$),
         ),
         map(([ dragItems, currentFormattedAnswer ]) => this.formatDragItems(dragItems, currentFormattedAnswer)),
-        tap(console.log),
         shareReplay(1),
       );
 
@@ -105,7 +114,6 @@ export class DndGroupComponent implements OnInit, OnDestroy {
           combineLatest(this.dropItems, this.formattedDragItems$)
         ),
         map(([ dropItems, formattedDragItems ]) => this.formatDropItems(dropItems, formattedDragItems)),
-        tap(console.log),
         shareReplay(1),
       );
 

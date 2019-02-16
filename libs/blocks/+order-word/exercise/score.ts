@@ -73,7 +73,6 @@ export class OrderWordScoreStrategy extends BlockBaseScoreStrategy<
      * После того, как дан ответ, у нас осталось N2 = N-1 элементов для выбора,
      * и какое-то кол-во баллов S2, ну и применяем тот же алгоритм (edited)
      */
-    // Score: right 3.04 | wrong 6.96 | remaining 0
     const { changedItems, startingIndex } = this.getItemsDiff(answer.formattedValue, prevAnswerItems);
 
     changedItems.forEach((item, changedItemIndex) => {

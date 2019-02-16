@@ -1,4 +1,5 @@
 import { IBlockAnswer } from '../base/model/interface';
+import { TScoreHandler } from '../base/score/interface';
 
 export type TDndGroupDragId = string;
 export type TDndGroupDropId = string;
@@ -41,3 +42,10 @@ export interface IDropData {
   draggingId: TDndGroupDragId;
   dropItem: IDndGroupDropItemFormatted;
 }
+
+export interface IDndGroupScoreHandlerParams {
+  correctAnswer: TDndGroupAnswerValue;
+  answers: TDndGroupAnswer[];
+}
+
+export type TDndGroupScoreHandler = TScoreHandler<TDndGroupAnswer, IDndGroupScoreHandlerParams>;

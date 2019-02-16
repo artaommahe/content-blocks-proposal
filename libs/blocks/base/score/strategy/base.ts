@@ -11,7 +11,7 @@ import { Observable, of, Subject } from 'rxjs';
 
 export class BlockBaseScoreStrategy<
   TModel extends BlockBaseModel<any, any> = BlockBaseModel<any, any>,
-  THandlerAnswer = IBlockAnswer<any>,
+  THandlerAnswer extends IBlockAnswer<any> = IBlockAnswer<any>,
   THandlerParams = void,
 > {
   protected blockScoreApi: BlockScoreApi;
@@ -86,7 +86,9 @@ export class BlockBaseScoreStrategy<
   protected score(model: TModel, startingScore: IBlockScore): Observable<IBlockScore> {
     return this.getScoreAnswers(model).pipe(
       pairwise(),
-      map(([ prev, next ]) => next.filter(answer => !prev.includes(answer))),
+      map(([ prev, next ]) =>
+        next.filter(answer => !prev.some(prevAnswer => prevAnswer.createdAt === answer.createdAt))
+      ),
       withLatestFrom(this.getScoreHandlerParams(model)),
       scan<[ THandlerAnswer[], THandlerParams ], IBlockScore>(
         (lastScore, [ answers, params ]) =>
@@ -106,7 +108,7 @@ export class BlockBaseScoreStrategy<
   }
 
   protected getScoreHandlerParams(_model: TModel): Observable<THandlerParams> {
-    return of();
+    return of(undefined!);
   }
 
   protected getStartingScore(): IBlockScore {
