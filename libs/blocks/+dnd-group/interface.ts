@@ -32,6 +32,7 @@ export interface IDndGroupAnswerFormatted extends TDndGroupAnswer {
 export interface IDndGroupDragItemFormatted extends IDndGroupDragItem {
   currentDropId: TDndGroupDropId | null;
   isCorrect: boolean | null;
+  score: IDndGroupDragScore;
 }
 
 export interface IDndGroupDropItemFormatted extends IDndGroupDropItem {
@@ -49,3 +50,10 @@ export interface IDndGroupScoreHandlerParams {
 }
 
 export type TDndGroupScoreHandler = TScoreHandler<TDndGroupAnswer, IDndGroupScoreHandlerParams>;
+
+export interface IDndGroupDragScore {
+  right: number;
+  wrong: number;
+}
+
+export type TDndGroupDragsScore = Record<TDndGroupDragId, IDndGroupDragScore>;

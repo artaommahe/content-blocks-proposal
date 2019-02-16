@@ -2,16 +2,14 @@ import { BlockBaseScoreStrategy } from '../../base/score/strategy/base';
 import { DndGroupModel } from './model';
 import {
   IDndGroupScoreHandlerParams, TDndGroupScoreHandler,
-  TDndGroupDragId, TDndGroupAnswerValue, TDndGroupAnswer, TDndGroupDropId,
+  TDndGroupDragId, TDndGroupAnswerValue, TDndGroupAnswer, TDndGroupDropId, IDndGroupDragScore, TDndGroupDragsScore,
 } from '../interface';
 import { IBlockScoreStrategyConfig, IBlockScore } from '../../base/score/interface';
 import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Store } from '@skyeng/libs/store/store';
 
-interface IScoreDragMetadata {
-  right: number;
-  wrong: number;
+interface IScoreDragMetadata extends IDndGroupDragScore {
   wrongDrops: TDndGroupDropId[];
 }
 
@@ -36,6 +34,8 @@ const STORE_INITIAL_STATE = {
 export class DndGroupScoreStrategy extends BlockBaseScoreStrategy<
   DndGroupModel, TDndGroupAnswer, IDndGroupScoreHandlerParams
 > {
+  public dragsScore$: Observable<TDndGroupDragsScore>;
+
   private store = new Store<typeof STORE_INITIAL_STATE>(STORE_INITIAL_STATE);
 
   constructor(
@@ -46,6 +46,8 @@ export class DndGroupScoreStrategy extends BlockBaseScoreStrategy<
     this.handlers = [
       this.dndGroupScoreHandler,
     ];
+
+    this.dragsScore$ = this.store.select([ 'drags' ]);
   }
 
   protected reset(): void {
@@ -86,8 +88,9 @@ export class DndGroupScoreStrategy extends BlockBaseScoreStrategy<
       return score;
     }
 
-    let dragMetadata = this.getDragMetadata(dragsMetadata, changedDragPosition.dragId);
+    let dragMetadata = dragsMetadata[changedDragPosition.dragId] || { ...DEFAULT_DRAG_METADATA };
 
+    // already was dropped here
     if (dragMetadata.wrongDrops.some(dropId => dropId === changedDragPosition.dropId)) {
       return;
     }
@@ -104,10 +107,7 @@ export class DndGroupScoreStrategy extends BlockBaseScoreStrategy<
     return this.calculateNewScore(dragsMetadata, score, Object.keys(correctAnswer).length);
   }
 
-  private getChangedDragPosition(
-    answer: TDndGroupAnswer,
-    answers: TDndGroupAnswer[]
-  ): IChangedDragPosition | null {
+  private getChangedDragPosition(answer: TDndGroupAnswer, answers: TDndGroupAnswer[]): IChangedDragPosition | null {
     const answerIndex = answers.findIndex(({ createdAt }) => createdAt === answer.createdAt);
     const prevAnswerItems = answers[answerIndex - 1]
       ? answers[answerIndex - 1].value
@@ -166,10 +166,6 @@ export class DndGroupScoreStrategy extends BlockBaseScoreStrategy<
     wrong /= dragsCount;
 
     return { ...score, right, wrong };
-  }
-
-  private getDragMetadata(drags: TDragsMetadata, dragId: TDndGroupDragId): IScoreDragMetadata {
-    return drags[dragId] || { ...DEFAULT_DRAG_METADATA };
   }
 
   private setScoreDragsMetadata(drags: TDragsMetadata): void {

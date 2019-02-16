@@ -1,16 +1,23 @@
-<div class="root"
-     [class.-dragging]="isDragging()"
-     [class.-draggable]="isDraggable()"
-     [class.-dropped]="isDropped()"
-     [class.-in-drop]="inDrop"
-     [class.-correct]="inDrop && isCorrect()"
-     [class.-wrong]="inDrop && isWrong()"
-     (click)="onClick()">
-  <sky-nodes-portal *ngIf="!isDropped() || inDrop; else plainText"
-                    [nodes]="dragItem.contentNodes">
-  </sky-nodes-portal>
+<div class="root">
+  <div class="text"
+       [class.-dragging]="isDragging()"
+       [class.-draggable]="isDraggable()"
+       [class.-dropped]="isDropped()"
+       [class.-in-drop]="inDrop"
+       [class.-correct]="inDrop && isCorrect()"
+       [class.-wrong]="inDrop && isWrong()"
+       (click)="onClick()">
+    <sky-nodes-portal *ngIf="!isDropped() || inDrop; else plainText"
+                      [nodes]="dragItem.contentNodes">
+    </sky-nodes-portal>
 
-  <ng-template #plainText>
-    {{ dragItem.text }}
-  </ng-template>
+    <ng-template #plainText>
+      {{ dragItem.text }}
+    </ng-template>
+  </div>
+
+  <sky-block-score-indicator *ngIf="inDrop"
+                             class="score"
+                             [score]="dragItem.score">
+  </sky-block-score-indicator>
 </div>

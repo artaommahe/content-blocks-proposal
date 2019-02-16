@@ -1,7 +1,8 @@
 import { Component, ChangeDetectionStrategy, Input, OnInit, OnDestroy, ElementRef, ChangeDetectorRef } from '@angular/core';
 import {
   IDndGroupDragItem, IDndGroupDropItem, TDndGroupAnswerValue,
-  TDndGroupAnswer, IDndGroupDragItemFormatted, IDndGroupDropItemFormatted, IDndGroupAnswerFormatted, TDndGroupDragId, IDropData
+  TDndGroupAnswer, IDndGroupDragItemFormatted, IDndGroupDropItemFormatted,
+  IDndGroupAnswerFormatted, TDndGroupDragId, IDropData, TDndGroupDragsScore
 } from '../../interface';
 import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { BaseBlockApi } from '@skyeng/libs/blocks/base/api/base';
@@ -103,9 +104,15 @@ export class DndGroupComponent implements OnInit, OnDestroy {
 
       this.formattedDragItems$ = itemsInitDone$.pipe(
         switchMap(() =>
-          combineLatest(this.dragItems, this.blockApi.model.currentFormattedAnswer$),
+          combineLatest(
+            this.dragItems,
+            this.blockApi.model.currentFormattedAnswer$,
+            this.blockApi.score.dragsScore$,
+          ),
         ),
-        map(([ dragItems, currentFormattedAnswer ]) => this.formatDragItems(dragItems, currentFormattedAnswer)),
+        map(([ dragItems, currentFormattedAnswer, dragsScore ]) =>
+          this.formatDragItems(dragItems, currentFormattedAnswer, dragsScore)
+        ),
         shareReplay(1),
       );
 
@@ -179,7 +186,8 @@ export class DndGroupComponent implements OnInit, OnDestroy {
 
   private formatDragItems(
     dragItems: IDndGroupDragItem[],
-    currentFormattedAnswer: IDndGroupAnswerFormatted | undefined
+    currentFormattedAnswer: IDndGroupAnswerFormatted | undefined,
+    dragsScore: TDndGroupDragsScore,
   ): IDndGroupDragItemFormatted[] {
     return dragItems.map(dragItem => {
       const dragAnswer = currentFormattedAnswer
@@ -188,8 +196,9 @@ export class DndGroupComponent implements OnInit, OnDestroy {
 
       const isCorrect = dragAnswer ? dragAnswer.isCorrect : null;
       const currentDropId = dragAnswer ? dragAnswer.dropId : null;
+      const score = dragsScore[dragItem.id] || { right: 0, wrong: 0 };
 
-      return { ...dragItem, isCorrect, currentDropId };
+      return { ...dragItem, isCorrect, currentDropId, score };
     });
   }
 
