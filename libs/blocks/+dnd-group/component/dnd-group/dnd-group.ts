@@ -23,6 +23,7 @@ import { DndGroupScoreStrategy } from '../../exercise/score';
                         [dropItems]="formattedDropItems$ | async"
                         [isMobile]="isMobile$ | async"
                         [draggingId]="draggingId$ | async"
+                        [isCompleted]="isCompleted$ | async"
                         (itemDrag)="onItemDrag($event)"
                         (itemDrop)="onItemDrop($event)">
     </sky-dnd-group-view>
@@ -37,6 +38,7 @@ export class DndGroupComponent implements OnInit, OnDestroy {
   public initDone$: Observable<boolean>;
   public isMobile$: Observable<boolean>;
   public draggingId$: Observable<TDndGroupDragId | null>;
+  public isCompleted$: Observable<boolean>;
 
   private blockApi: BaseBlockApi<TDndGroupAnswerValue, TDndGroupAnswer, DndGroupModel, DndGroupScoreStrategy>;
   private blockConfig: BlockConfig;
@@ -131,6 +133,10 @@ export class DndGroupComponent implements OnInit, OnDestroy {
       );
 
       this.draggingId$ = this.draggingId.asObservable();
+
+      this.isCompleted$ = this.formattedDragItems$.pipe(
+        map(formattedDragItems => formattedDragItems.every(dragItem => !!dragItem.isCorrect)),
+      );
 
       this.changeDetectorRef.markForCheck();
     });

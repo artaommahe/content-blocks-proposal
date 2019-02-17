@@ -12,6 +12,7 @@ export class DndGroupViewComponent {
   @Input() dropItems: IDndGroupDropItemFormatted[];
   @Input() isMobile: boolean;
   @Input() draggingId: TDndGroupDragId | null;
+  @Input() isCompleted: boolean;
 
   @Output() itemDrag = new EventEmitter<IDndGroupDragItemFormatted>();
   @Output() itemDrop = new EventEmitter<IDropData>();

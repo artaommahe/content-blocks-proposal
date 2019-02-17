@@ -8,10 +8,15 @@
   &.-mobile {
     background-color: #00bcd43b;
   }
+
+  &.-completed {
+    border-color: lightseagreen;
+  }
 }
 
 .drags {
   display: flex;
+  margin-bottom: 20px;
 
   > *:not(:last-child) {
     margin-right: 10px;
@@ -19,7 +24,6 @@
 }
 
 .drops {
-  margin-top: 20px;
   display: flex;
 
   > * {

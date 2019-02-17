@@ -1,6 +1,8 @@
 <div class="root"
-     [class.-mobile]="isMobile">
-  <div class="drags">
+     [class.-mobile]="isMobile"
+     [class.-completed]="isCompleted">
+  <div *ngIf="!isCompleted"
+       class="drags">
     <sky-dnd-group-drag-item *ngFor="let dragItem of dragItems"
                              [dragItem]="dragItem"
                              [draggingId]="draggingId"
