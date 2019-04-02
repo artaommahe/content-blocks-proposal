@@ -20,12 +20,9 @@ export function blocksListenGlobalEvent<T>(eventName: string): Observable<T> {
   );
 }
 
-export function blocksDispatchGlobalEvent<T>(eventName: string, data: T): void {
+export function blocksDispatchGlobalEvent<T>(name: string, data: T): void {
   const event = new CustomEvent(BLOCKS_CUSTOM_EVENT, {
-    detail: {
-      name: eventName,
-      data,
-    }
+    detail: { name, data }
   });
 
   window.dispatchEvent(event);
